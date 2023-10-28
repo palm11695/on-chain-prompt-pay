@@ -3,6 +3,7 @@ import { Home } from './pages/Home/Home'
 import { ConnectWalletPage } from './pages/ConnectWalletPage'
 import CreateSpendingWallet from './pages/CreateSpendingWallet/CreateSpendingWallet'
 import TopUpSpendingWallet from './pages/TopUpSpendingWallet/TopUpSpendingWallet'
+import TransferPage from './pages/Transfer/TransferPage'
 
 const router = createBrowserRouter([
   {
@@ -20,6 +21,10 @@ const router = createBrowserRouter([
   {
     path: '/topup-spending-wallet',
     element: <TopUpSpendingWallet />,
+  },
+  {
+    path: '/transfer',
+    element: <TransferPage />,
   },
 ])
 
