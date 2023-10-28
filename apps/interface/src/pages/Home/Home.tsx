@@ -1,26 +1,49 @@
+import { useMemo } from 'react'
 import Button from '../../components/Button'
 import Container from '../../components/Container'
 import { ConnectWalletPage } from '../../components/OnBoarding/ConnectWalletPage'
 
 import { useAccountContextState } from '../context/AccountContextProvider'
 
+import Skeleton from 'react-loading-skeleton'
+import { USD_THB } from '../../utils/constants'
+import { middleEllipsis } from '../../utils/address'
+
 export const Home = () => {
-  const { account } = useAccountContextState()
+  const { account, assetBalances } = useAccountContextState()
   if (!account) return <ConnectWalletPage />
   // if (isAaNeeded) return <CreateSpendingWallet />
+
+  const isValueReady = useMemo(() => {
+    if (!assetBalances) return false
+
+    return true
+  }, [assetBalances])
 
   return (
     <Container>
       <div className="w-full rounded-xl bg-blue-600 p-4 text-white">
         <div className="text-sm text-blue-200">Usable balance</div>
-        <div className="text-2xl font-medium">฿10,000.00</div>
+        <div className="text-2xl font-medium">
+          ฿
+          {isValueReady && assetBalances ? (
+            <>
+              {(
+                ((Number(assetBalances['ETH']) * 1750) / 1e18) *
+                USD_THB
+              ).toLocaleString('TH') ?? 0}
+            </>
+          ) : (
+            <Skeleton />
+          )}
+        </div>
 
         <div className="h-8" />
 
         <div className="text-xs font-light text-blue-300">
           Spending wallet address
         </div>
-        <div className="text-xs text-blue-200">0xc0ff...4979</div>
+        <div className="text-xs text-blue-200">{middleEllipsis(account)}</div>
       </div>
 
       <div className="h-8" />
@@ -33,8 +56,23 @@ export const Home = () => {
           <div className="text-sm text-slate-400">Ethereum</div>
         </div>
         <div className="text-right">
-          <div>1 ETH</div>
-          <div className="text-sm text-slate-400">63,000.00฿</div>
+          {isValueReady && assetBalances ? (
+            <>
+              <div>
+                {(Number(assetBalances['ETH']) / 1e18).toLocaleString() ?? 0}{' '}
+                ETH
+              </div>
+              <div className="text-sm text-slate-400">
+                {(
+                  ((Number(assetBalances['ETH']) * 1750) / 1e18) *
+                  USD_THB
+                ).toLocaleString('TH') ?? 0}
+                ฿
+              </div>
+            </>
+          ) : (
+            <Skeleton />
+          )}
         </div>
       </div>
 

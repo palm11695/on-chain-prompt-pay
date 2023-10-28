@@ -2,6 +2,9 @@ import { Context, ReactNode, createContext, useContext } from 'react'
 
 import { IAccountContextState, IAccountContextAction } from './interfaces'
 import { useAccount } from 'wagmi'
+import { assets } from '../../configs/assets'
+import { useAssetBalances } from '../../hooks/useAssetBalances'
+import { usePageChain } from '../../hooks/usePageChain'
 
 const ContextState: Context<IAccountContextState | null> =
   createContext<IAccountContextState | null>(null)
@@ -15,6 +18,7 @@ export const AccountContextProvider = ({
   children: ReactNode
 }): JSX.Element => {
   const { address } = useAccount()
+  const chain = usePageChain()
   // const [aaAccount, _] = useAtom(aaAccountAtom)
 
   // load data
@@ -31,10 +35,13 @@ export const AccountContextProvider = ({
   //   return false
   // }, [address, aaAccountAddress])
 
+  const assetBalances = useAssetBalances(assets, chain.id, address)
+
   return (
     <ContextState.Provider
       value={{
         account: address,
+        assetBalances,
         // , aaAccountData, aaAccountAddress, isAaNeeded
       }}
     >
