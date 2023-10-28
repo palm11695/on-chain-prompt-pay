@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react'
 import { aaAccountAtom } from '../../hooks/atoms/atoms'
 
 import { useNavigate } from 'react-router-dom'
+import Container from '../../components/Container'
 
 const CreateSpendingWallet = () => {
   const { account: accountAddress } = useAccountContextState()
@@ -67,7 +68,7 @@ const CreateSpendingWallet = () => {
   }, [aaAccount])
 
   return (
-    <div className="container mx-auto px-4 py-6">
+    <Container>
       <div className="text-xl font-semibold">Create Spending Wallet</div>
 
       <div className="h-8" />
@@ -82,7 +83,7 @@ const CreateSpendingWallet = () => {
       <Button onClick={handleSign} disabled={isSigning}>
         {isSigning ? 'Signing...' : 'Continue'}
       </Button>
-    </div>
+    </Container>
   )
 }
 
