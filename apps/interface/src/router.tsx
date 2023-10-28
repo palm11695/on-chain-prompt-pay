@@ -4,6 +4,7 @@ import { ConnectWalletPage } from './pages/ConnectWalletPage'
 import CreateSpendingWallet from './pages/CreateSpendingWallet/CreateSpendingWallet'
 import TopUpSpendingWallet from './pages/TopUpSpendingWallet/TopUpSpendingWallet'
 import TransferPage from './pages/Transfer/TransferPage'
+import TopUpPortal from './pages/TopUpPortal/TopUpPortal'
 
 const router = createBrowserRouter([
   {
@@ -25,6 +26,10 @@ const router = createBrowserRouter([
   {
     path: '/transfer',
     element: <TransferPage />,
+  },
+  {
+    path: '/topup-portal',
+    element: <TopUpPortal />,
   },
 ])
 
