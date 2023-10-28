@@ -10,7 +10,7 @@ export const Home = () => {
   return (
     <>
       {/* <button className="bg-blue-600 text-white">Connect Wallet</button> */}
-      <div className="text-yellow-500 text-6xl">test</div>
+      <div className="text-6xl text-yellow-500">test</div>
     </>
   )
 }
