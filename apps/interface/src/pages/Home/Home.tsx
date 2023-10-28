@@ -1,11 +1,14 @@
-// import { useState } from 'react'
-// import { useAccount } from 'wagmi'
-// import { ConnectButton } from '@rainbow-me/rainbowkit'
-
 import Button from '../../components/Button'
 import Container from '../../components/Container'
+import { ConnectWalletPage } from '../../components/OnBoarding/ConnectWalletPage'
+
+import { useAccountContextState } from '../context/AccountContextProvider'
 
 export const Home = () => {
+  const { account } = useAccountContextState()
+  if (!account) return <ConnectWalletPage />
+  // if (isAaNeeded) return <CreateSpendingWallet />
+
   return (
     <Container>
       <div className="w-full rounded-xl bg-blue-600 p-4 text-white">

@@ -6,18 +6,16 @@ import { useAccountContextState } from '../context/AccountContextProvider'
 import { useSignMessage } from 'wagmi'
 import { ethers } from 'ethers'
 import { useAtom } from 'jotai'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { aaAccountAtom } from '../../hooks/atoms/atoms'
 
-import { useNavigate } from 'react-router-dom'
 import Container from '../../components/Container'
 
 const CreateSpendingWallet = () => {
   const { account: accountAddress } = useAccountContextState()
   const spendingWalletPin = usePinInputApi('spendingWalletPin', '')
   const [isSigning, setIsSigning] = useState(false)
-  const [aaAccount, setAaAccounts] = useAtom(aaAccountAtom)
-  const navigate = useNavigate()
+  const [_, setAaAccounts] = useAtom(aaAccountAtom)
 
   const { signMessage } = useSignMessage({
     message: keccak256(
@@ -61,11 +59,6 @@ const CreateSpendingWallet = () => {
     setIsSigning(true)
     signMessage()
   }
-
-  useEffect(() => {
-    if (aaAccount[accountAddress ?? zeroAddress])
-      navigate('/topup-spending-wallet')
-  }, [aaAccount])
 
   return (
     <Container>
