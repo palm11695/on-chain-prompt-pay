@@ -8,9 +8,13 @@ export const Home = () => {
   // console.log('account:', account)
   // return <div className="h-full">Home page</div>
   return (
-    <>
-      {/* <button className="bg-blue-600 text-white">Connect Wallet</button> */}
-      <div className="text-6xl text-yellow-500">test</div>
-    </>
+    <div className="container mx-auto">
+      <div className="h-screen px-4 py-6">
+        <div className="flex h-full flex-col items-center justify-center gap-y-4">
+          <div className="text-xl font-semibold">OnChainPromptPay</div>
+          <button className="w-full rounded-lg bg-blue-600 py-2 text-white">Connect Wallet</button>
+        </div>
+      </div>
+    </div>
   )
 }
