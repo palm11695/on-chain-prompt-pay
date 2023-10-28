@@ -11,6 +11,7 @@ contract PaymentHandlerBaseTest is BaseTest {
   PaymentHandler internal paymentHandler;
 
   function setUp() public virtual {
-    paymentHandler = new PaymentHandler(address(wNative));
+    address operator = vm.addr(operatorPrivateKey);
+    paymentHandler = new PaymentHandler(address(wNative), operator);
   }
 }
