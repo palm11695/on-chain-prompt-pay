@@ -6,5 +6,11 @@ export const Home = () => {
   // const [count, setCount] = useState(0)
   // const account = useAccount()
   // console.log('account:', account)
-  return <div className="h-full">Home page</div>
+  // return <div className="h-full">Home page</div>
+  return (
+    <>
+      {/* <button className="bg-blue-600 text-white">Connect Wallet</button> */}
+      <div className="text-yellow-500 text-6xl">test</div>
+    </>
+  )
 }
