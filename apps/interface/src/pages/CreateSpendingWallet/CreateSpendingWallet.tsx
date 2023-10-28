@@ -3,7 +3,7 @@ import Button from '../../components/Button'
 const CreateSpendingWallet = () => {
   return (
     <div className="container mx-auto px-4 py-6">
-      <div className="text-lg font-semibold">Create Spending Wallet</div>
+      <div className="text-xl font-semibold">Create Spending Wallet</div>
 
       <div className="h-8" />
 
