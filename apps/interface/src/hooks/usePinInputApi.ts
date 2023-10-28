@@ -3,7 +3,7 @@ import { normalizeProps, useMachine } from '@zag-js/react'
 
 import { useMemo } from 'react'
 
-export type PinInputV2Api = ReturnType<typeof usePinInputApi>
+export type PinInputApi = ReturnType<typeof usePinInputApi>
 
 export const usePinInputApi = (id: string, nextFocusElementId: string) => {
   const [state, send] = useMachine(

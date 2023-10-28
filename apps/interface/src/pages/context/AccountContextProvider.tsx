@@ -1,7 +1,10 @@
-import { Context, ReactNode, createContext, useContext, useState } from 'react'
+import { Context, ReactNode, createContext, useContext, useMemo } from 'react'
 
 import { IAccountContextState, IAccountContextAction } from './interfaces'
-import { useAccount } from 'wagmi'
+import { Address, useAccount } from 'wagmi'
+import { aaAccountAtom } from '../../hooks/atoms/atoms'
+import { useAtom } from 'jotai'
+import { parseAddressFromEncryptedWallet } from '../../utils/address'
 
 const ContextState: Context<IAccountContextState | null> =
   createContext<IAccountContextState | null>(null)
@@ -15,10 +18,27 @@ export const AccountContextProvider = ({
   children: ReactNode
 }): JSX.Element => {
   const { address } = useAccount()
+  const [aaAccount, _] = useAtom(aaAccountAtom)
+
+  // load data
+  const [aaAccountData, aaAccountAddress] = useMemo(() => {
+    if (!address) return [undefined, undefined]
+    if (!aaAccount[address]) return [undefined, undefined]
+
+    const _account = aaAccount[address]
+    return [_account, parseAddressFromEncryptedWallet(_account) as Address]
+  }, [address, aaAccount])
+
+  const isAaNeeded = useMemo(() => {
+    if (address && !aaAccountAddress) return true
+    return false
+  }, [address, aaAccountAddress])
 
   return (
-    <ContextState.Provider value={{ account: address }}>
-      {children}
+    <ContextState.Provider
+      value={{ account: address, aaAccountData, aaAccountAddress, isAaNeeded }}
+    >
+      <ContextAction.Provider value={{}}>{children}</ContextAction.Provider>
     </ContextState.Provider>
   )
 }

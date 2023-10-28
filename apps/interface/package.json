@@ -16,6 +16,7 @@
     "@zag-js/pin-input": "^0.10.4",
     "@zag-js/react": "^0.10.4",
     "dotenv": "^16.3.1",
+    "ethers": "^6.8.0",
     "headlessui": "^0.0.0",
     "init": "^0.1.2",
     "jotai": "^2.5.0",
