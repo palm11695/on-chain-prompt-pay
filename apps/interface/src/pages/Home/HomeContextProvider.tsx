@@ -1,7 +1,6 @@
 import { Context, ReactNode, createContext, useContext, useState } from 'react'
 
 import { IHomePageContextAction, IHomePageContextState } from './interfaces'
-import { useAccount } from 'wagmi'
 
 const ContextState: Context<IHomePageContextState | null> = createContext<IHomePageContextState | null>(null)
 
@@ -9,10 +8,8 @@ const ContextAction: Context<IHomePageContextAction | null> = createContext<IHom
 
 export const HomePageContextProvider = ({ children }: { children: ReactNode }): JSX.Element => {
   const [state, _] = useState(0)
-  const temp = useAccount()
-  console.log('temp:', temp)
 
-  return <ContextState.Provider value={state}></ContextState.Provider>
+  return <ContextState.Provider value={state}>{children}</ContextState.Provider>
 }
 
 export const useHomePageContextState = (): IHomePageContextState => {

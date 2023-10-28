@@ -6,12 +6,14 @@ interface IENV {
   wagmiPollingInterval: number
 }
 
-const env: IENV = {
+const processEnv = import.meta.env
+
+const envConfig: IENV = {
   customEnv: 'testnet',
-  alchemyId: process.env.ALCHEMY_ID || '_lB-1XEUQZaboGqTm_L-uaKNcBzGMev9',
-  defaultArbitrumRpcURL: process.env.REACT_APP_DEFAULT_ARBITRUM_RPC_URL || '',
-  wssArbitrumRpcURL: process.env.REACT_APP_WSS_ARBITRUM_RPC_URL || '',
-  wagmiPollingInterval: Number(process.env.REACT_APP_WAGMI_POLLING_INTERVAL) || 10000,
+  alchemyId: processEnv.ALCHEMY_ID || '_lB-1XEUQZaboGqTm_L-uaKNcBzGMev9',
+  defaultArbitrumRpcURL: processEnv.VITE_DEFAULT_ARBITRUM_RPC_URL || '',
+  wssArbitrumRpcURL: processEnv.VITE_WSS_ARBITRUM_RPC_URL || '',
+  wagmiPollingInterval: Number(processEnv.VITE_WAGMI_POLLING_INTERVAL) || 10000,
 }
 
-export default env
+export default envConfig
