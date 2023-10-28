@@ -2,6 +2,8 @@
 // import { useAccount } from 'wagmi'
 // import { ConnectButton } from '@rainbow-me/rainbowkit'
 
+import Button from '../../components/Button'
+
 export const Home = () => {
   // const [count, setCount] = useState(0)
   // const account = useAccount()
@@ -12,7 +14,7 @@ export const Home = () => {
       <div className="h-screen px-4 py-6">
         <div className="flex h-full flex-col items-center justify-center gap-y-4">
           <div className="text-xl font-semibold">OnChainPromptPay</div>
-          <button className="w-full rounded-lg bg-blue-600 py-2 text-white">Connect Wallet</button>
+          <Button>Connect Wallet</Button>
         </div>
       </div>
     </div>
