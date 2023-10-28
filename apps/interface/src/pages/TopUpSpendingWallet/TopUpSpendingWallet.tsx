@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom'
+import Container from '../../components/Container'
 
 const TopUpSpendingWallet = () => {
   return (
-    <div className="container mx-auto px-4 py-6">
+    <Container>
       <div className="text-xl font-semibold">Topup Spending Wallet</div>
 
       <div className="h-8" />
@@ -18,7 +19,7 @@ const TopUpSpendingWallet = () => {
       <Link to="/">
         <a className="text-xs text-gray-400 underline">or topup later</a>
       </Link>
-    </div>
+    </Container>
   )
 }
 

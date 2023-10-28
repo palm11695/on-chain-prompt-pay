@@ -1,12 +1,19 @@
 import { createBrowserRouter } from 'react-router-dom'
 import { Home } from './pages/Home/Home'
+import { ConnectWalletPage } from './pages/ConnectWalletPage'
 import CreateSpendingWallet from './pages/CreateSpendingWallet/CreateSpendingWallet'
 import TopUpSpendingWallet from './pages/TopUpSpendingWallet/TopUpSpendingWallet'
+import TransferPage from './pages/Transfer/TransferPage'
+import TopUpPortal from './pages/TopUpPortal/TopUpPortal'
 
 const router = createBrowserRouter([
   {
     path: '/',
     element: <Home />,
+  },
+  {
+    path: '/connect-wallet',
+    element: <ConnectWalletPage />,
   },
   {
     path: '/create-spending-wallet',
@@ -15,6 +22,14 @@ const router = createBrowserRouter([
   {
     path: '/topup-spending-wallet',
     element: <TopUpSpendingWallet />,
+  },
+  {
+    path: '/transfer',
+    element: <TransferPage />,
+  },
+  {
+    path: '/topup-portal',
+    element: <TopUpPortal />,
   },
 ])
 
