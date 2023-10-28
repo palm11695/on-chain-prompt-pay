@@ -8,22 +8,14 @@ contract PaymentHandlerInitTransferRequestTest is PaymentHandlerBaseTest {
     super.setUp();
   }
 
-  function _operatorSign(
-    uint256 _exchangeRate,
-    uint256 _deadline
-  ) internal view returns (uint8 v, bytes32 r, bytes32 s) {
-    bytes32 messageHash = keccak256(abi.encodePacked(_exchangeRate, _deadline));
-    return vm.sign(operatorPrivateKey, messageHash);
-  }
-
   function testCorrectness_WhenInitTransferRequest() public {
-    // alice fund to alice_aa
+    // alice fund 1000 ethers
     vm.startPrank(ALICE);
     wNative.approve(address(paymentHandler), 1000);
     paymentHandler.fund(1000);
     vm.stopPrank();
 
-    // alice_aa init transfer request
+    // alice init transfer request
     uint256 thbAmount = 100;
     uint256 exchangeRate = 2;
     uint256 deadline = block.timestamp + 1000;

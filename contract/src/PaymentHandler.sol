@@ -21,7 +21,7 @@ contract PaymentHandler is IPaymentHandler {
 
   event TransferRequestInitiated(
     uint256 indexed id,
-    address indexed aaSigner,
+    address indexed sender,
     uint256 thbAmount,
     uint256 exchangeRate,
     uint256 deadline
@@ -150,7 +150,7 @@ contract PaymentHandler is IPaymentHandler {
     TransferRequest storage req = transferRequests[_transferRequestId];
 
     // revert if transfer request is already confirmed
-    if (isTransferRequestConfirmed[nextTransferRequestId]) {
+    if (isTransferRequestConfirmed[_transferRequestId]) {
       revert PaymentHandler_TransferRequestAlreadyConfirmed();
     }
 
@@ -162,7 +162,8 @@ contract PaymentHandler is IPaymentHandler {
     // transfer wNative from this contract to operator
     wNative.safeTransfer(operator, req.tokenAmount);
 
-    // decrease locked balance of request sender
+    // decrease balance of request sender
+    balances[req.sender] -= req.tokenAmount;
     lockedBalances[req.sender] -= req.tokenAmount;
 
     // set transfer request to confirmed

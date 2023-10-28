@@ -26,4 +26,12 @@ contract BaseTest is Test {
     wNative.mint(ALICE, 1000);
     wNative.mint(BOB, 1000);
   }
+
+  function _operatorSign(
+    uint256 _exchangeRate,
+    uint256 _deadline
+  ) internal view returns (uint8 v, bytes32 r, bytes32 s) {
+    bytes32 messageHash = keccak256(abi.encodePacked(_exchangeRate, _deadline));
+    return vm.sign(operatorPrivateKey, messageHash);
+  }
 }
