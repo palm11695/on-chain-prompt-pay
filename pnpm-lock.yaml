@@ -26,6 +26,12 @@ importers:
       '@wagmi/core':
         specifier: ^1.4.5
         version: 1.4.5(@types/react@18.2.31)(react@18.2.0)(typescript@5.2.2)(viem@1.18.0)
+      '@zag-js/pin-input':
+        specifier: ^0.10.4
+        version: 0.10.4
+      '@zag-js/react':
+        specifier: ^0.10.4
+        version: 0.10.4(react-dom@18.2.0)(react@18.2.0)
       dotenv:
         specifier: ^16.3.1
         version: 16.3.1
@@ -1998,6 +2004,91 @@ packages:
       '@walletconnect/window-getters': 1.0.1
       tslib: 1.14.1
 
+  /@zag-js/anatomy@0.10.4:
+    resolution: {integrity: sha512-ZZJaqi+MUiAINed31SBkdgtJv2/R/DodWY9EvQ6srkBSrYga16DsOvVrVwANuES9brMKZ/8TxN2JQThEHec24g==}
+    dev: false
+
+  /@zag-js/core@0.10.4:
+    resolution: {integrity: sha512-dAZDTLPalJHacY3hPho1dUd/xYQX29sT9XcxAi2hd9piFU7OMrLqDBmbqPid2OrdE7YSoxolq8FHfKgQpjUw2w==}
+    dependencies:
+      '@zag-js/store': 0.10.4
+      klona: 2.0.6
+    dev: false
+
+  /@zag-js/dom-event@0.10.4:
+    resolution: {integrity: sha512-9hmUUrGqbw+BssQQ/nleNiVJ7gAwaaxp10WYAMrDmABrmqZP83iiU9HoG3Vrln6TZy0LT2ULPpLozA2v45Jydw==}
+    dependencies:
+      '@zag-js/text-selection': 0.10.4
+      '@zag-js/types': 0.10.4
+    dev: false
+
+  /@zag-js/dom-query@0.10.4:
+    resolution: {integrity: sha512-XYKdI2+JSVx7+UDL+OCOeeUuDMrXu25AKljs/R5+7N6/K2Tuvzx8t5a4CnhEWHXWkWz2NXXqKRZOokUYnYFqvA==}
+    dev: false
+
+  /@zag-js/form-utils@0.10.4:
+    resolution: {integrity: sha512-jo2mTFOymJNdczsqNrk1dodoB+VMbgTCJegPhad8pAHbDZFslKVZoGNGeTpdmlX4IJISSjhWdIo6zv2B+UmdDg==}
+    dependencies:
+      '@zag-js/mutation-observer': 0.10.4
+    dev: false
+
+  /@zag-js/mutation-observer@0.10.4:
+    resolution: {integrity: sha512-UKkZSCjT8JjLMYEmXez0EpfCyLEqxXPzDi97PTK54AqQWXyWK2ddKRJkqSH1b11x3mSdfbr+DLE0mbUeFYb6EA==}
+    dev: false
+
+  /@zag-js/pin-input@0.10.4:
+    resolution: {integrity: sha512-44ZNoN4pe1RqxVC1cBXKCdSVxTTRoFO/Cy1KLI1jyA7ZMyhHVG0Z0qPctDt/u1yzHafiSTA2rQqTm+FdVPaA3w==}
+    dependencies:
+      '@zag-js/anatomy': 0.10.4
+      '@zag-js/core': 0.10.4
+      '@zag-js/dom-event': 0.10.4
+      '@zag-js/dom-query': 0.10.4
+      '@zag-js/form-utils': 0.10.4
+      '@zag-js/types': 0.10.4
+      '@zag-js/utils': 0.10.4
+      '@zag-js/visually-hidden': 0.10.4
+    dev: false
+
+  /@zag-js/react@0.10.4(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-CFsOAdbCfYSl/s/tVk3kJYdGl2boMtsRDJiMUJ/rZwTwt80DTVDm7R5Q1re9HnnutGE1noGnXd6sHPvwQmuLhg==}
+    peerDependencies:
+      react: '>=18.0.0'
+      react-dom: '>=18.0.0'
+    dependencies:
+      '@zag-js/core': 0.10.4
+      '@zag-js/store': 0.10.4
+      '@zag-js/types': 0.10.4
+      proxy-compare: 2.5.1
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+    dev: false
+
+  /@zag-js/store@0.10.4:
+    resolution: {integrity: sha512-tVxCSq5KN/gentSyKUZjt9H4Mx2uKxtR5V4Ev5eo6BN48u33Pp8DeO0WpMiRX6K1R3UCyxghVVR3vJaYXBERBg==}
+    dependencies:
+      proxy-compare: 2.5.1
+    dev: false
+
+  /@zag-js/text-selection@0.10.4:
+    resolution: {integrity: sha512-2xgN+CEyr7v6clDebdBoIswkM9giU1yaZZ6mU4FF9891MxfR7V7PBZeBWoBq0t22kww10MwR+NsBUYqKhht+6w==}
+    dependencies:
+      '@zag-js/dom-query': 0.10.4
+    dev: false
+
+  /@zag-js/types@0.10.4:
+    resolution: {integrity: sha512-hxchilBkKnVLGX+NZmqbin21dak8aVk8KwWmk1n3wHD92JYIdvnOO1PN0zw+d1dmHssrSBiWTm7Wr9YsbqPi7Q==}
+    dependencies:
+      csstype: 3.1.2
+    dev: false
+
+  /@zag-js/utils@0.10.4:
+    resolution: {integrity: sha512-Cnq+8N7Ff7VsUbGGxU3+ZGzEbdwfS//d+UwrcuYGDEGscEWZgCcDOnmPMZs6wDS2g1f/LxtU8yB1IiSregQbtA==}
+    dev: false
+
+  /@zag-js/visually-hidden@0.10.4:
+    resolution: {integrity: sha512-G8lRCk7ksdN5E7fpo9dVA8LQQ80OHnU8fqpg4HZvfd36XJgAdXAaEKyW1UaW6TcVNuDP8yQDhB9fLvmq6tZHvw==}
+    dev: false
+
   /JSONStream@1.3.5:
     resolution: {integrity: sha512-E+iruNOY8VV9s4JEbe1aNEm6MiszPRr/UfcHMz0TQh1BXSxHK+ASV1R6W4HpjBhSeS+54PIsAMCBmwD06LLsqQ==}
     hasBin: true
@@ -3501,6 +3592,11 @@ packages:
 
   /keyvaluestorage-interface@1.0.0:
     resolution: {integrity: sha512-8t6Q3TclQ4uZynJY9IGr2+SsIGwK9JHcO6ootkHCGA0CrQCRy+VkouYNO2xicET6b9al7QKzpebNow+gkpCL8g==}
+
+  /klona@2.0.6:
+    resolution: {integrity: sha512-dhG34DXATL5hSxJbIexCft8FChFXtmskoZYnoPWjXQuebWYCNkVeV3KkGegCK9CP1oswI/vQibS2GY7Em/sJJA==}
+    engines: {node: '>= 8'}
+    dev: false
 
   /levn@0.4.1:
     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==}

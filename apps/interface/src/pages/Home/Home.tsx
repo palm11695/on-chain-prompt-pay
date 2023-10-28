@@ -1,14 +1,9 @@
 import { ConnectButton } from '@rainbow-me/rainbowkit'
+import { useAccountContextState } from '../context/AccountContextProvider'
+import { ConnectWalletPage } from '../../components/OnBoarding/ConnectWalletPage'
+import { ValidateWalletPage } from '../../components/ValidateWalletPage'
 
 export const Home = () => {
-  return (
-    <div className="container mx-auto">
-      <div className="h-screen px-4 py-6">
-        <div className="flex h-full flex-col items-center justify-center gap-y-4">
-          <div className="text-xl font-semibold">OnChainPromptPay</div>
-          <ConnectButton />
-        </div>
-      </div>
-    </div>
-  )
+  const { account } = useAccountContextState()
+  return <>{account ? <ValidateWalletPage /> : <ConnectWalletPage />}</>
 }

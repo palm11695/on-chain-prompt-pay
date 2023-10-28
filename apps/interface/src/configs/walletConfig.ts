@@ -1,8 +1,6 @@
 import { configureChains, createConfig } from 'wagmi'
 import { arbitrum, arbitrumGoerli } from 'wagmi/chains'
-import {
-  getDefaultWallets,
-} from '@rainbow-me/rainbowkit';
+import { getDefaultWallets } from '@rainbow-me/rainbowkit'
 
 import envConfig from './envConfig'
 import { publicProvider } from 'wagmi/providers/public'
@@ -15,15 +13,18 @@ const {
   chains: _chains,
   publicClient,
   webSocketPublicClient,
-} = configureChains([isMainnet() ? arbitrum : arbitrumGoerli], [publicProvider()])
+} = configureChains(
+  [isMainnet() ? arbitrum : arbitrumGoerli],
+  [publicProvider()],
+)
 
 export const chains = _chains
 
 const { connectors } = getDefaultWallets({
   appName: 'OnChainPromptPay App',
   projectId: 'YOUR_PROJECT_ID',
-  chains
-});
+  chains,
+})
 
 export const wagmiConfig = createConfig({
   autoConnect: true,
