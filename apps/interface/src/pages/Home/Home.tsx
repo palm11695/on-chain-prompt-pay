@@ -6,10 +6,6 @@ import Button from '../../components/Button'
 import Container from '../../components/Container'
 
 export const Home = () => {
-  // const [count, setCount] = useState(0)
-  // const account = useAccount()
-  // console.log('account:', account)
-  // return <div className="h-full">Home page</div>
   return (
     <Container>
       <div className="w-full rounded-xl bg-blue-600 p-4 text-white">
