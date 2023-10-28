@@ -11,8 +11,6 @@ contract BaseTest is Test {
   address internal constant DEPLOYER = address(0x01);
   address internal constant ALICE = address(0x11);
   address internal constant BOB = address(0x12);
-  address internal constant ALICE_AA = address(0x21);
-  address internal constant BOB_AA = address(0x22);
 
   uint256 internal immutable operatorPrivateKey;
   MockERC20 internal immutable wNative;
@@ -21,8 +19,6 @@ contract BaseTest is Test {
     vm.label(DEPLOYER, "DEPLOYER");
     vm.label(ALICE, "ALICE");
     vm.label(BOB, "BOB");
-    vm.label(ALICE_AA, "ALICE_AA");
-    vm.label(BOB_AA, "BOB_AA");
 
     operatorPrivateKey = vm.createWallet("OPERATOR").privateKey;
 
