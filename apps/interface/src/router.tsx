@@ -1,6 +1,5 @@
 import { createBrowserRouter } from 'react-router-dom'
 import { Home } from './pages/Home/Home'
-import { Login } from './pages/Login'
 import CreateSpendingWallet from './pages/CreateSpendingWallet/CreateSpendingWallet'
 import TopUpSpendingWallet from './pages/TopUpSpendingWallet/TopUpSpendingWallet'
 
@@ -8,10 +7,6 @@ const router = createBrowserRouter([
   {
     path: '/',
     element: <Home />,
-  },
-  {
-    path: '/login',
-    element: <Login />,
   },
   {
     path: '/create-spending-wallet',
