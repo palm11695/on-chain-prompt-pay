@@ -1,8 +1,9 @@
 import Button from '../../components/Button'
+import Container from '../../components/Container'
 
 const CreateSpendingWallet = () => {
   return (
-    <div className="container mx-auto px-4 py-6">
+    <Container>
       <div className="text-xl font-semibold">Create Spending Wallet</div>
 
       <div className="h-8" />
@@ -13,7 +14,7 @@ const CreateSpendingWallet = () => {
       <div className="h-12" />
 
       <Button>Continue</Button>
-    </div>
+    </Container>
   )
 }
 
