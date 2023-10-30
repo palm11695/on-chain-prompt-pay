@@ -5,6 +5,7 @@ import TopUpSpendingWallet from './pages/TopUpSpendingWallet/TopUpSpendingWallet
 import TransferPage from './pages/Transfer/TransferPage'
 import TopUpPortal from './pages/TopUpPortal/TopUpPortal'
 import { ConnectWalletPage } from './components/OnBoarding/ConnectWalletPage'
+import { QrCodeReader } from './pages/Reader/QrCodeReader'
 
 const router = createBrowserRouter([
   {
@@ -30,6 +31,10 @@ const router = createBrowserRouter([
   {
     path: '/topup-portal',
     element: <TopUpPortal />,
+  },
+  {
+    path: '/qr-reader',
+    element: <QrCodeReader />,
   },
 ])
 
