@@ -4,40 +4,8 @@ pragma solidity 0.8.21;
 import { PaymentHandlerBaseTest, IPaymentHandler } from "./PaymentHandler_Base.t.sol";
 
 contract PaymentHandlerConfirmTransferRequestTest is PaymentHandlerBaseTest {
-  address internal operator;
-
   function setUp() public override {
     super.setUp();
-    operator = vm.addr(operatorPrivateKey);
-  }
-
-  function _initTransferRequest(
-    address _sender,
-    uint256 _thbAmount,
-    uint256 _exchangeRate,
-    uint256 _deadline
-  ) internal {
-    (uint8 v, bytes32 r, bytes32 s) = _operatorSign(_exchangeRate, _deadline);
-
-    vm.prank(_sender);
-    paymentHandler.initTransferRequest(_thbAmount, _exchangeRate, _deadline, v, r, s);
-  }
-
-  function _aliceInitTransferRequest() internal {
-    // alice fund 1000 ethers
-    vm.startPrank(ALICE);
-    wNative.approve(address(paymentHandler), 1000);
-    paymentHandler.fund(1000);
-    vm.stopPrank();
-
-    // alice init transfer request
-    uint256 thbAmount = 100;
-    uint256 exchangeRate = 2;
-    uint256 deadline = block.timestamp + 1000;
-    _initTransferRequest(ALICE, thbAmount, exchangeRate, deadline);
-
-    assertEq(paymentHandler.lockedBalances(ALICE), 200);
-    assertEq(paymentHandler.nextTransferRequestId(), 1);
   }
 
   function testCorrectness_WhenConfirmTransferRequest() public {
@@ -49,10 +17,9 @@ contract PaymentHandlerConfirmTransferRequestTest is PaymentHandlerBaseTest {
     paymentHandler.confirmTransferRequest(transferRequestId);
 
     assertEq(wNative.balanceOf(operator), 200);
-    assertEq(wNative.balanceOf(address(paymentHandler)), 800);
+    assertEq(wNative.balanceOf(address(paymentHandler)), 0);
 
-    assertEq(paymentHandler.balances(ALICE), 800);
-    assertEq(paymentHandler.lockedBalances(ALICE), 0);
+    assertEq(paymentHandler.reservedBalances(ALICE), 0);
     assertEq(paymentHandler.nextTransferRequestId(), 1);
   }
 
