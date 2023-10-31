@@ -16,7 +16,7 @@ contract PaymentHandlerInitTransferRequestTest is PaymentHandlerBaseTest {
     (uint8 v, bytes32 r, bytes32 s) = _operatorSign(exchangeRate, deadline);
 
     vm.startPrank(ALICE);
-    wNative.approve(address(paymentHandler), thbAmount * exchangeRate);
+    usdc.approve(address(paymentHandler), thbAmount * exchangeRate);
     paymentHandler.initTransferRequest(thbAmount, exchangeRate, deadline, v, r, s);
     vm.stopPrank();
 
@@ -36,7 +36,7 @@ contract PaymentHandlerInitTransferRequestTest is PaymentHandlerBaseTest {
     (v, r, s) = _operatorSign(firstExchangeRate, deadline);
 
     vm.startPrank(ALICE);
-    wNative.approve(address(paymentHandler), thbAmount * firstExchangeRate);
+    usdc.approve(address(paymentHandler), thbAmount * firstExchangeRate);
     paymentHandler.initTransferRequest(thbAmount, firstExchangeRate, deadline, v, r, s);
     vm.stopPrank();
 
@@ -48,7 +48,7 @@ contract PaymentHandlerInitTransferRequestTest is PaymentHandlerBaseTest {
     (v, r, s) = _operatorSign(secondExchangeRate, deadline);
 
     vm.startPrank(ALICE);
-    wNative.approve(address(paymentHandler), thbAmount * secondExchangeRate);
+    usdc.approve(address(paymentHandler), thbAmount * secondExchangeRate);
     paymentHandler.initTransferRequest(thbAmount, secondExchangeRate, deadline, v, r, s);
     vm.stopPrank();
 

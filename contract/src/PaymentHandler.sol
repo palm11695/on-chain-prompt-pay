@@ -4,6 +4,7 @@ pragma solidity 0.8.21;
 // libraries
 import { ERC20 } from "@solmate/tokens/ERC20.sol";
 import { SafeTransferLib } from "@solmate/utils/SafeTransferLib.sol";
+import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 // interfaces
 import { IPaymentHandler } from "./interfaces/IPaymentHandler.sol";
@@ -30,7 +31,7 @@ contract PaymentHandler is IPaymentHandler {
 
   // === States ===
 
-  ERC20 public immutable wNative;
+  ERC20 public immutable token;
 
   address public operator;
   uint256 public nextTransferRequestId;
@@ -38,8 +39,8 @@ contract PaymentHandler is IPaymentHandler {
   mapping(uint256 reqId => TransferRequest info) public transferRequests;
   mapping(uint256 reqId => bool isTransfered) public isTransferRequestConfirmed;
 
-  constructor(address _wNative, address _operator) {
-    wNative = ERC20(_wNative);
+  constructor(address _token, address _operator) {
+    token = ERC20(_token);
     operator = _operator;
     nextTransferRequestId = 0;
   }
@@ -54,7 +55,7 @@ contract PaymentHandler is IPaymentHandler {
   // check sign message is from operator
   function _verifyMessage(uint256 _exchangeRate, uint256 _deadline, uint8 _v, bytes32 _r, bytes32 _s) internal view {
     bytes32 hash = keccak256(abi.encodePacked(_exchangeRate, _deadline));
-    address signer = ecrecover(hash, _v, _r, _s);
+    address signer = ECDSA.recover(hash, _v, _r, _s);
 
     if (signer != operator) {
       revert PaymentHandler_SignerIsNotOperator();
@@ -86,7 +87,7 @@ contract PaymentHandler is IPaymentHandler {
     uint256 tokenAmount = _thbAmount * _exchangeRate;
 
     // safe pull token from sender
-    wNative.safeTransferFrom(msg.sender, address(this), tokenAmount);
+    token.safeTransferFrom(msg.sender, address(this), tokenAmount);
     reservedBalances[msg.sender] += tokenAmount;
 
     // store transfer request info
@@ -125,8 +126,8 @@ contract PaymentHandler is IPaymentHandler {
       revert PaymentHandler_RequestIsLessThanOneDay();
     }
 
-    // transfer wNative from this contract to sender
-    wNative.safeTransfer(msg.sender, req.tokenAmount);
+    // transfer token from this contract to sender
+    token.safeTransfer(msg.sender, req.tokenAmount);
 
     // decrease balance of request sender
     reservedBalances[msg.sender] -= req.tokenAmount;
@@ -157,8 +158,8 @@ contract PaymentHandler is IPaymentHandler {
       revert PaymentHandler_ExceedDeadline();
     }
 
-    // transfer wNative from this contract to operator
-    wNative.safeTransfer(operator, req.tokenAmount);
+    // transfer token from this contract to operator
+    token.safeTransfer(operator, req.tokenAmount);
 
     // decrease balance of request sender
     reservedBalances[req.sender] -= req.tokenAmount;

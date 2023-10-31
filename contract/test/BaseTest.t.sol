@@ -13,7 +13,7 @@ contract BaseTest is Test {
   address internal constant BOB = address(0x12);
 
   uint256 internal immutable operatorPrivateKey;
-  MockERC20 internal immutable wNative;
+  MockERC20 internal immutable usdc;
 
   constructor() {
     vm.label(DEPLOYER, "DEPLOYER");
@@ -22,9 +22,9 @@ contract BaseTest is Test {
 
     operatorPrivateKey = vm.createWallet("OPERATOR").privateKey;
 
-    wNative = new MockERC20("Wrapped Native Token", "WNATIVE", 18);
-    wNative.mint(ALICE, 1000);
-    wNative.mint(BOB, 1000);
+    usdc = new MockERC20("USD Coin", "USDC", 18);
+    usdc.mint(ALICE, 1000);
+    usdc.mint(BOB, 1000);
   }
 
   function _operatorSign(
