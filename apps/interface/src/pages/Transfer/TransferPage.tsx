@@ -6,11 +6,13 @@ import { middleEllipsis } from '../../utils/utils'
 import { useAccountContextState } from '../context/AccountContextProvider'
 import Skeleton from 'react-loading-skeleton'
 import { USDC_USD, USD_THB } from '../../utils/constants'
+import ReviewTransaction from './ReviewTransaction'
 
 const TransferPage = () => {
   const { account, assetBalances } = useAccountContextState()
   const [toWallet, setToWallet] = useState<string | undefined>(undefined)
   const [amountIn, setAmountIn] = useState('0.00')
+  const [isReview, setIsReview] = useState(false)
   const navigate = useNavigate()
 
   // effect search params
@@ -25,7 +27,13 @@ const TransferPage = () => {
     }
   }, [search])
 
-  return (
+  return isReview ? (
+    <ReviewTransaction
+      spender={toWallet}
+      amount={amountIn}
+      onCancel={() => setIsReview(false)}
+    />
+  ) : (
     <Container>
       <div className="text-xl font-semibold">Transfer</div>
 
@@ -92,8 +100,8 @@ const TransferPage = () => {
         ~ {(Number(amountIn) / (USDC_USD * USD_THB)).toLocaleString()} USDC
       </div>
 
-      <div className="fixed bottom-0 left-0 flex w-full flex-col gap-y-1.5 px-4 pb-4">
-        <Button>Confirm and Pay</Button>
+      <div className="fixed bottom-0 left-0 flex w-full flex-col gap-y-2 px-4 pb-4">
+        <Button onClick={() => setIsReview(true)}>Confirm and Pay</Button>
         <Button variant="danger" onClick={() => navigate('/')}>
           Cancel
         </Button>
