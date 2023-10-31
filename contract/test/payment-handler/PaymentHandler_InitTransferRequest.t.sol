@@ -9,39 +9,22 @@ contract PaymentHandlerInitTransferRequestTest is PaymentHandlerBaseTest {
   }
 
   function testCorrectness_WhenInitTransferRequest() public {
-    // alice fund 1000 ethers
-    vm.startPrank(ALICE);
-    wNative.approve(address(paymentHandler), 1000);
-    paymentHandler.fund(1000);
-    vm.stopPrank();
-
     // alice init transfer request
     uint256 thbAmount = 100;
     uint256 exchangeRate = 2;
     uint256 deadline = block.timestamp + 1000;
     (uint8 v, bytes32 r, bytes32 s) = _operatorSign(exchangeRate, deadline);
 
-    vm.prank(ALICE);
+    vm.startPrank(ALICE);
+    wNative.approve(address(paymentHandler), thbAmount * exchangeRate);
     paymentHandler.initTransferRequest(thbAmount, exchangeRate, deadline, v, r, s);
+    vm.stopPrank();
 
-    uint256 lockedBalance = paymentHandler.lockedBalances(ALICE);
-
-    assertEq(lockedBalance, 200);
+    assertEq(paymentHandler.reservedBalances(ALICE), 200);
     assertEq(paymentHandler.nextTransferRequestId(), 1);
-
-    // alice should not be able to withdraw more than `funding balance - locked balance`
-    vm.prank(ALICE);
-    vm.expectRevert(IPaymentHandler.PaymentHandler_InsufficientBalance.selector);
-    paymentHandler.withdraw(ALICE, 801);
   }
 
   function testCorrectness_WhenInitTransferRequestTwice() public {
-    // alice fund 500 ethers
-    vm.startPrank(ALICE);
-    wNative.approve(address(paymentHandler), 500);
-    paymentHandler.fund(500);
-    vm.stopPrank();
-
     uint8 v;
     bytes32 r;
     bytes32 s;
@@ -52,20 +35,24 @@ contract PaymentHandlerInitTransferRequestTest is PaymentHandlerBaseTest {
     uint256 firstExchangeRate = 2;
     (v, r, s) = _operatorSign(firstExchangeRate, deadline);
 
-    vm.prank(ALICE);
+    vm.startPrank(ALICE);
+    wNative.approve(address(paymentHandler), thbAmount * firstExchangeRate);
     paymentHandler.initTransferRequest(thbAmount, firstExchangeRate, deadline, v, r, s);
+    vm.stopPrank();
 
-    assertEq(paymentHandler.lockedBalances(ALICE), 200);
+    assertEq(paymentHandler.reservedBalances(ALICE), 200);
     assertEq(paymentHandler.nextTransferRequestId(), 1);
 
     // alice init transfer request again with different exchange rate
     uint256 secondExchangeRate = 3;
     (v, r, s) = _operatorSign(secondExchangeRate, deadline);
 
-    vm.prank(ALICE);
+    vm.startPrank(ALICE);
+    wNative.approve(address(paymentHandler), thbAmount * secondExchangeRate);
     paymentHandler.initTransferRequest(thbAmount, secondExchangeRate, deadline, v, r, s);
+    vm.stopPrank();
 
-    assertEq(paymentHandler.lockedBalances(ALICE), 500);
+    assertEq(paymentHandler.reservedBalances(ALICE), 500);
     assertEq(paymentHandler.nextTransferRequestId(), 2);
   }
 
@@ -112,7 +99,7 @@ contract PaymentHandlerInitTransferRequestTest is PaymentHandlerBaseTest {
     vm.expectRevert(IPaymentHandler.PaymentHandler_SignerIsNotOperator.selector);
     paymentHandler.initTransferRequest(thbAmount, exchangeRate, deadline, v, r, s);
 
-    assertEq(paymentHandler.lockedBalances(ALICE), 0);
+    assertEq(paymentHandler.reservedBalances(ALICE), 0);
     assertEq(paymentHandler.nextTransferRequestId(), 0);
   }
 
@@ -135,28 +122,7 @@ contract PaymentHandlerInitTransferRequestTest is PaymentHandlerBaseTest {
     vm.expectRevert(IPaymentHandler.PaymentHandler_SignerIsNotOperator.selector);
     paymentHandler.initTransferRequest(thbAmount, exchangeRate, deadline, v, r, s);
 
-    assertEq(paymentHandler.lockedBalances(ALICE), 0);
-    assertEq(paymentHandler.nextTransferRequestId(), 0);
-  }
-
-  function testRevert_WhenInitTransferRequest_WithExceedBalance() public {
-    // alice fund 1000 ethers
-    vm.startPrank(ALICE);
-    wNative.approve(address(paymentHandler), 1000);
-    paymentHandler.fund(1000);
-    vm.stopPrank();
-
-    // alice init transfer request
-    uint256 thbAmount = 1000;
-    uint256 exchangeRate = 2;
-    uint256 deadline = block.timestamp + 1000;
-    (uint8 v, bytes32 r, bytes32 s) = _operatorSign(exchangeRate, deadline);
-
-    vm.prank(ALICE);
-    vm.expectRevert(IPaymentHandler.PaymentHandler_InsufficientBalance.selector);
-    paymentHandler.initTransferRequest(thbAmount, exchangeRate, deadline, v, r, s);
-
-    assertEq(paymentHandler.lockedBalances(ALICE), 0);
+    assertEq(paymentHandler.reservedBalances(ALICE), 0);
     assertEq(paymentHandler.nextTransferRequestId(), 0);
   }
 }

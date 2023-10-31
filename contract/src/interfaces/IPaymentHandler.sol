@@ -3,18 +3,12 @@ pragma solidity 0.8.21;
 
 interface IPaymentHandler {
   error PaymentHandler_AmountIsZero();
-  error PaymentHandler_InsufficientBalance();
   error PaymentHandler_SignerIsNotOperator();
+  error PaymentHandler_RequestIsLessThanOneDay();
   error PaymentHandler_ExceedDeadline();
   error PaymentHandler_Unauthorized();
   error PaymentHandler_NoTransferRequest();
   error PaymentHandler_TransferRequestAlreadyConfirmed();
-
-  function fund(uint256 _amount) external;
-
-  function withdraw(address _recipient, uint256 _amount) external;
-
-  function withdrawAll(address _recipient) external;
 
   // check sign message is from operator
   function initTransferRequest(
@@ -25,6 +19,8 @@ interface IPaymentHandler {
     bytes32 _r,
     bytes32 _s
   ) external;
+
+  function cancelTransferRequest(uint256 _transferRequestId) external;
 
   function confirmTransferRequest(uint256 _transferRequestId) external;
 }
