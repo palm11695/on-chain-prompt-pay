@@ -14,6 +14,7 @@ contract PaymentHandler is IPaymentHandler {
   struct TransferRequest {
     address sender;
     uint256 tokenAmount;
+    uint256 initTimestamp;
     uint256 deadline;
   }
 
@@ -33,8 +34,7 @@ contract PaymentHandler is IPaymentHandler {
 
   address public operator;
   uint256 public nextTransferRequestId;
-  mapping(address sender => uint256 amount) public balances;
-  mapping(address sender => uint256 amount) public lockedBalances;
+  mapping(address sender => uint256 amount) public reservedBalances;
   mapping(uint256 reqId => TransferRequest info) public transferRequests;
   mapping(uint256 reqId => bool isTransfered) public isTransferRequestConfirmed;
 
@@ -61,45 +61,6 @@ contract PaymentHandler is IPaymentHandler {
     }
   }
 
-  function fund(uint256 _amount) external override {
-    // revert if amount is zero
-    if (_amount == 0) {
-      revert PaymentHandler_AmountIsZero();
-    }
-
-    // transfer wNative from msg.sender to this contract
-    wNative.safeTransferFrom(msg.sender, address(this), _amount);
-
-    // increase balance of msg.sender
-    balances[msg.sender] += _amount;
-  }
-
-  function withdraw(address recipient, uint256 amount) external override {
-    // revert if amount is zero
-    if (amount == 0) {
-      revert PaymentHandler_AmountIsZero();
-    }
-
-    // check if balance of msg.sender is enough
-    if (balances[msg.sender] - lockedBalances[msg.sender] < amount) {
-      revert PaymentHandler_InsufficientBalance();
-    }
-
-    // transfer wNative from this contract to recipient
-    wNative.safeTransfer(recipient, amount);
-
-    // decrease balance of msg.sender
-    balances[msg.sender] -= amount;
-  }
-
-  function withdrawAll(address recipient) external override {
-    // transfer all wNative from this contract to recipient
-    wNative.safeTransfer(recipient, balances[msg.sender]);
-
-    // set balance of msg.sender to zero
-    balances[msg.sender] = 0;
-  }
-
   function initTransferRequest(
     uint256 _thbAmount,
     uint256 _exchangeRate,
@@ -123,14 +84,14 @@ contract PaymentHandler is IPaymentHandler {
 
     // calculate balance to lock
     uint256 tokenAmount = _thbAmount * _exchangeRate;
-    if (tokenAmount > balances[msg.sender]) {
-      revert PaymentHandler_InsufficientBalance();
-    }
-    lockedBalances[msg.sender] += tokenAmount;
+
+    // safe pull token from sender
+    wNative.safeTransferFrom(msg.sender, address(this), tokenAmount);
+    reservedBalances[msg.sender] += tokenAmount;
 
     // store transfer request info
     isTransferRequestConfirmed[nextTransferRequestId] = false;
-    transferRequests[nextTransferRequestId] = TransferRequest(msg.sender, tokenAmount, _deadline);
+    transferRequests[nextTransferRequestId] = TransferRequest(msg.sender, tokenAmount, block.timestamp, _deadline);
 
     // emit event with id to notify operator
     emit TransferRequestInitiated(nextTransferRequestId, msg.sender, _thbAmount, _exchangeRate, _deadline);
@@ -140,6 +101,43 @@ contract PaymentHandler is IPaymentHandler {
     }
   }
 
+  function cancelTransferRequest(uint256 _transferRequestId) external override {
+    // revert if no transfer request
+    if (nextTransferRequestId == 0 || _transferRequestId >= nextTransferRequestId) {
+      revert PaymentHandler_NoTransferRequest();
+    }
+
+    TransferRequest memory req = transferRequests[_transferRequestId];
+
+    // revert if msg.sender is not transfer request sender
+    if (msg.sender != req.sender) {
+      revert PaymentHandler_Unauthorized();
+    }
+
+    // revert if transfer request is already confirmed
+    if (isTransferRequestConfirmed[_transferRequestId]) {
+      revert PaymentHandler_TransferRequestAlreadyConfirmed();
+    }
+
+    // TODO: re-consider this logic
+    // only transfer request that init more than 1 day can be canceled
+    if (block.timestamp < req.initTimestamp + 1 days) {
+      revert PaymentHandler_RequestIsLessThanOneDay();
+    }
+
+    // transfer wNative from this contract to sender
+    wNative.safeTransfer(msg.sender, req.tokenAmount);
+
+    // decrease balance of request sender
+    reservedBalances[msg.sender] -= req.tokenAmount;
+
+    // set transfer request to confirmed
+    isTransferRequestConfirmed[_transferRequestId] = true;
+
+    // delete transfer request info
+    delete transferRequests[_transferRequestId];
+  }
+
   function confirmTransferRequest(uint256 _transferRequestId) external override onlyOperator {
     // revert if no transfer request
     if (nextTransferRequestId == 0 || _transferRequestId >= nextTransferRequestId) {
@@ -147,7 +145,7 @@ contract PaymentHandler is IPaymentHandler {
     }
 
     // get transfer request info
-    TransferRequest storage req = transferRequests[_transferRequestId];
+    TransferRequest memory req = transferRequests[_transferRequestId];
 
     // revert if transfer request is already confirmed
     if (isTransferRequestConfirmed[_transferRequestId]) {
@@ -163,8 +161,7 @@ contract PaymentHandler is IPaymentHandler {
     wNative.safeTransfer(operator, req.tokenAmount);
 
     // decrease balance of request sender
-    balances[req.sender] -= req.tokenAmount;
-    lockedBalances[req.sender] -= req.tokenAmount;
+    reservedBalances[req.sender] -= req.tokenAmount;
 
     // set transfer request to confirmed
     isTransferRequestConfirmed[_transferRequestId] = true;
