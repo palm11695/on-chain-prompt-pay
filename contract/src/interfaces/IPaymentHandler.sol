@@ -7,8 +7,10 @@ interface IPaymentHandler {
   error PaymentHandler_SignerIsNotOperator();
   error PaymentHandler_ExceedDeadline();
   error PaymentHandler_Unauthorized();
+  error PaymentHandler_NoTransferRequest();
+  error PaymentHandler_TransferRequestAlreadyConfirmed();
 
-  function fund(address _aaSigner, uint256 _amount) external;
+  function fund(uint256 _amount) external;
 
   function withdraw(address _recipient, uint256 _amount) external;
 
@@ -24,7 +26,5 @@ interface IPaymentHandler {
     bytes32 _s
   ) external;
 
-  function cancelTransferRequest() external;
-
-  function confirmTransferRequest() external;
+  function confirmTransferRequest(uint256 _transferRequestId) external;
 }
