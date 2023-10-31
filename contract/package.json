@@ -3,7 +3,9 @@
   "version": "0.0.3",
   "main": "index.js",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "deploy": "forge script scripts/Deploy.s.sol --rpc-url arbitrum_goerli --broadcast --slow"
+  },
   "devDependencies": {},
   "dependencies": {
     "dotenv": "^16.0.0",

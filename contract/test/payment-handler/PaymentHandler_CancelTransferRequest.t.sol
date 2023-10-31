@@ -9,7 +9,7 @@ contract PaymentHandlerCancelTransferRequestTest is PaymentHandlerBaseTest {
   }
 
   function testCorrectness_WhenCancelTransferRequest_RequestIsInitForMoreThanOneDay() public {
-    uint256 aliceBalanceBeforeInit = wNative.balanceOf(ALICE);
+    uint256 aliceBalanceBeforeInit = usdc.balanceOf(ALICE);
     _aliceInitTransferRequest();
 
     // alice cancel transfer request after 1 day
@@ -18,8 +18,8 @@ contract PaymentHandlerCancelTransferRequestTest is PaymentHandlerBaseTest {
     vm.prank(ALICE);
     paymentHandler.cancelTransferRequest(transferRequestId);
 
-    assertEq(wNative.balanceOf(ALICE), aliceBalanceBeforeInit);
-    assertEq(wNative.balanceOf(address(paymentHandler)), 0);
+    assertEq(usdc.balanceOf(ALICE), aliceBalanceBeforeInit);
+    assertEq(usdc.balanceOf(address(paymentHandler)), 0);
     assertEq(paymentHandler.reservedBalances(ALICE), 0);
   }
 
@@ -36,7 +36,7 @@ contract PaymentHandlerCancelTransferRequestTest is PaymentHandlerBaseTest {
     vm.expectRevert(IPaymentHandler.PaymentHandler_NoTransferRequest.selector);
     paymentHandler.cancelTransferRequest(1);
 
-    assertEq(wNative.balanceOf(address(paymentHandler)), 200);
+    assertEq(usdc.balanceOf(address(paymentHandler)), 200);
     assertEq(paymentHandler.reservedBalances(ALICE), 200);
   }
 
@@ -49,13 +49,13 @@ contract PaymentHandlerCancelTransferRequestTest is PaymentHandlerBaseTest {
     vm.expectRevert(IPaymentHandler.PaymentHandler_Unauthorized.selector);
     paymentHandler.cancelTransferRequest(transferRequestId);
 
-    assertEq(wNative.balanceOf(address(paymentHandler)), 200);
+    assertEq(usdc.balanceOf(address(paymentHandler)), 200);
     assertEq(paymentHandler.reservedBalances(ALICE), 200);
   }
 
   function testRevert_WhenCancelTransferRequest_AfterConfirm() public {
     _aliceInitTransferRequest();
-    uint256 aliceBalanceAfterInit = wNative.balanceOf(ALICE);
+    uint256 aliceBalanceAfterInit = usdc.balanceOf(ALICE);
 
     // operator confirm transfer request
     uint256 transferRequestId = 0;
@@ -67,8 +67,8 @@ contract PaymentHandlerCancelTransferRequestTest is PaymentHandlerBaseTest {
     vm.expectRevert(IPaymentHandler.PaymentHandler_TransferRequestAlreadyConfirmed.selector);
     paymentHandler.cancelTransferRequest(transferRequestId);
 
-    assertEq(wNative.balanceOf(address(operator)), 200);
-    assertEq(wNative.balanceOf(address(paymentHandler)), 0);
-    assertEq(wNative.balanceOf(ALICE), aliceBalanceAfterInit);
+    assertEq(usdc.balanceOf(address(operator)), 200);
+    assertEq(usdc.balanceOf(address(paymentHandler)), 0);
+    assertEq(usdc.balanceOf(ALICE), aliceBalanceAfterInit);
   }
 }

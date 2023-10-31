@@ -13,7 +13,7 @@ contract PaymentHandlerBaseTest is BaseTest {
 
   function setUp() public virtual {
     operator = vm.addr(operatorPrivateKey);
-    paymentHandler = new PaymentHandler(address(wNative), operator);
+    paymentHandler = new PaymentHandler(address(usdc), operator);
   }
 
   function _initTransferRequest(
@@ -25,7 +25,7 @@ contract PaymentHandlerBaseTest is BaseTest {
     (uint8 v, bytes32 r, bytes32 s) = _operatorSign(_exchangeRate, _deadline);
 
     vm.startPrank(_sender);
-    wNative.approve(address(paymentHandler), _thbAmount * _exchangeRate);
+    usdc.approve(address(paymentHandler), _thbAmount * _exchangeRate);
     paymentHandler.initTransferRequest(_thbAmount, _exchangeRate, _deadline, v, r, s);
     vm.stopPrank();
   }
@@ -37,7 +37,7 @@ contract PaymentHandlerBaseTest is BaseTest {
     uint256 deadline = block.timestamp + 1000;
     _initTransferRequest(ALICE, thbAmount, exchangeRate, deadline);
 
-    assertEq(wNative.balanceOf(address(paymentHandler)), 200);
+    assertEq(usdc.balanceOf(address(paymentHandler)), 200);
     assertEq(paymentHandler.reservedBalances(ALICE), 200);
     assertEq(paymentHandler.nextTransferRequestId(), 1);
   }
