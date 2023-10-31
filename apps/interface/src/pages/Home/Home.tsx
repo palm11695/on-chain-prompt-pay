@@ -6,7 +6,7 @@ import { useAccountContextState } from '../context/AccountContextProvider'
 
 import Skeleton from 'react-loading-skeleton'
 import { ETH_USD, USD_THB } from '../../utils/constants'
-import { middleEllipsis } from '../../utils/address'
+import { middleEllipsis } from '../../utils/utils'
 import { useNavigate } from 'react-router-dom'
 
 export const Home = () => {

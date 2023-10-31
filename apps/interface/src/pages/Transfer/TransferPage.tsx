@@ -1,8 +1,8 @@
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import Button from '../../components/Button'
 import Container from '../../components/Container'
 import { useEffect, useState } from 'react'
-import { middleEllipsis, simplifyPromptPayAccount } from '../../utils/address'
+import { middleEllipsis } from '../../utils/utils'
 import { useAccountContextState } from '../context/AccountContextProvider'
 import Skeleton from 'react-loading-skeleton'
 import { ETH_USD, USD_THB } from '../../utils/constants'
@@ -11,16 +11,17 @@ const TransferPage = () => {
   const { account, assetBalances } = useAccountContextState()
   const [toWallet, setToWallet] = useState<string | undefined>(undefined)
   const [amountIn, setAmountIn] = useState('0.00')
+  const navigate = useNavigate()
 
   // effect search params
   const { search } = useLocation()
   useEffect(() => {
-    const userType = new URLSearchParams(search).get('type')
-    const value = new URLSearchParams(search).get('value')
+    const transferTo = new URLSearchParams(search).get('transferTo')
+    const amount = new URLSearchParams(search).get('amount')
 
-    if (userType && value) {
-      const simplifiedText = simplifyPromptPayAccount(value, userType)
-      setToWallet(simplifiedText)
+    if (transferTo) {
+      setToWallet(transferTo)
+      if (amount) setAmountIn(amount)
     }
   }, [search])
 
@@ -79,6 +80,7 @@ const TransferPage = () => {
           className="w-full bg-transparent pr-4 text-right text-lg outline-none"
           placeholder="0.00"
           type="number"
+          value={amountIn}
           onChange={(e) => setAmountIn(e.target.value)}
         />
         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-0.5 text-lg">
@@ -87,16 +89,14 @@ const TransferPage = () => {
       </div>
       <div className="h-1" />
       <div className="w-full text-right text-sm text-slate-400">
-        ~{' '}
-        {(Number(amountIn) / (ETH_USD * USD_THB)).toLocaleString('EN', {
-          maximumSignificantDigits: 2,
-        })}{' '}
-        ETH
+        ~ {(Number(amountIn) / (ETH_USD * USD_THB)).toLocaleString()} ETH
       </div>
 
       <div className="fixed bottom-0 left-0 flex w-full flex-col gap-y-1.5 px-4 pb-4">
         <Button>Confirm and Pay</Button>
-        <Button variant="danger">Cancel</Button>
+        <Button variant="danger" onClick={() => navigate('/')}>
+          Cancel
+        </Button>
       </div>
     </Container>
   )

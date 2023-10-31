@@ -6,7 +6,10 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 const Button = ({ children, variant, ...props }: ButtonProps) => {
   if (variant === 'secondary') {
     return (
-      <button className="w-full rounded-xl bg-blue-200 py-3 font-semibold text-blue-600">
+      <button
+        className="w-full rounded-xl bg-blue-200 py-3 font-semibold text-blue-600"
+        {...props}
+      >
         {children}
       </button>
     )
@@ -14,7 +17,10 @@ const Button = ({ children, variant, ...props }: ButtonProps) => {
 
   if (variant === 'danger') {
     return (
-      <button className="w-full rounded-xl bg-red-50 py-3 font-semibold text-red-500">
+      <button
+        className="w-full rounded-xl bg-red-50 py-3 font-semibold text-red-500"
+        {...props}
+      >
         {children}
       </button>
     )
