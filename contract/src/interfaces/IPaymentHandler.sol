@@ -10,7 +10,6 @@ interface IPaymentHandler {
   error PaymentHandler_NoTransferRequest();
   error PaymentHandler_TransferRequestAlreadyConfirmed();
 
-  // check sign message is from operator
   function initTransferRequest(
     uint256 _thbAmount,
     uint256 _exchangeRate,
