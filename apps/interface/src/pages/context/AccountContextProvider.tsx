@@ -2,8 +2,8 @@ import { Context, ReactNode, createContext, useContext } from 'react'
 
 import { IAccountContextState, IAccountContextAction } from './interfaces'
 import { useAccount } from 'wagmi'
-import { assets } from '../../configs/assets'
-import { useAssetBalances } from '../../hooks/useAssetBalances'
+import { tokens } from '../../configs/tokens'
+import { useTokenBalances } from '../../hooks/useTokenBalances'
 import { usePageChain } from '../../hooks/usePageChain'
 
 const ContextState: Context<IAccountContextState | null> =
@@ -35,7 +35,7 @@ export const AccountContextProvider = ({
   //   return false
   // }, [address, aaAccountAddress])
 
-  const assetBalances = useAssetBalances(assets, chain.id, address)
+  const assetBalances = useTokenBalances(tokens, chain.id, address)
 
   return (
     <ContextState.Provider

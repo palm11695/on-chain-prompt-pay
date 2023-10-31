@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 import { middleEllipsis } from '../../utils/utils'
 import { useAccountContextState } from '../context/AccountContextProvider'
 import Skeleton from 'react-loading-skeleton'
-import { ETH_USD, USD_THB } from '../../utils/constants'
+import { USDC_USD, USD_THB } from '../../utils/constants'
 
 const TransferPage = () => {
   const { account, assetBalances } = useAccountContextState()
@@ -45,14 +45,14 @@ const TransferPage = () => {
             <>
               <div>
                 {(
-                  ((Number(assetBalances['ETH']) * 1750) / 1e18) *
+                  ((Number(assetBalances['USDC']) * USDC_USD) / 1e6) *
                   USD_THB
                 ).toLocaleString('TH') ?? 0}
                 ฿
               </div>
               <div className="text-sm text-slate-400">
-                {(Number(assetBalances['ETH']) / 1e18).toLocaleString() ?? 0}{' '}
-                ETH
+                {(Number(assetBalances['USDC']) / 1e6).toLocaleString() ?? 0}{' '}
+                USDC
               </div>
             </>
           ) : (
@@ -89,7 +89,7 @@ const TransferPage = () => {
       </div>
       <div className="h-1" />
       <div className="w-full text-right text-sm text-slate-400">
-        ~ {(Number(amountIn) / (ETH_USD * USD_THB)).toLocaleString()} ETH
+        ~ {(Number(amountIn) / (USDC_USD * USD_THB)).toLocaleString()} USDC
       </div>
 
       <div className="fixed bottom-0 left-0 flex w-full flex-col gap-y-1.5 px-4 pb-4">

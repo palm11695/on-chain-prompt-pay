@@ -1,25 +1,26 @@
 import { useMemo } from 'react'
 
 import { useContractReads, erc20ABI, Address } from 'wagmi'
+import { ITokenProfile } from '../configs/tokens'
 
-export const useAssetBalances = (
-  assets: Record<string, string>,
+export const useTokenBalances = (
+  tokens: ITokenProfile[],
   chainId: number,
   account?: string,
 ) => {
   const contractCalls = useMemo(() => {
     if (!account) return undefined
 
-    return Object.values(assets).map((address) => {
+    return tokens.map((token) => {
       return {
-        address: address as Address,
+        address: token.address as Address,
         abi: erc20ABI,
         functionName: 'balanceOf',
         args: [account],
         chainId,
       }
     })
-  }, [assets, chainId, account])
+  }, [tokens, chainId, account])
 
   const { data, refetch } = useContractReads({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -34,9 +35,9 @@ export const useAssetBalances = (
 
     const _data = data.map((c) => c.result)
 
-    return Object.keys(assets).reduce(
-      (acc, asset) => {
-        return { ...acc, [asset]: _data.shift() as bigint }
+    return tokens.reduce(
+      (acc, token) => {
+        return { ...acc, [token.displaySymbol]: _data.shift() as bigint }
       },
       {} as Record<string, bigint>,
     )

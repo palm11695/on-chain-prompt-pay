@@ -4,14 +4,14 @@ export const parseAddressFromEncryptedWallet = (encryptedWallet: string) => {
   return encryptedWallet ? `0x${JSON.parse(encryptedWallet).address}` : ''
 }
 
-export function middleEllipsis(text: string): string {
+export const middleEllipsis = (text: string): string => {
   return text.substr(0, 4) + '...' + text.substr(text.length - 4, text.length)
 }
 
-export function simplifyPromptPayAccount(
+export const simplifyPromptPayAccount = (
   accountType: string,
   value?: string,
-): string {
+): string => {
   const parts = []
   if (value) {
     if (accountType === SpenderType.ID_Card.toString()) {
@@ -43,7 +43,7 @@ export function simplifyPromptPayAccount(
   return ''
 }
 
-export function simplifyAmount(amount?: string) {
+export const simplifyAmount = (amount?: string) => {
   if (amount) {
     // amount sent here will be '54{0x-10}{0-9999999}.xx
     const simplifiedAmount = amount.slice(4)
@@ -51,4 +51,8 @@ export function simplifyAmount(amount?: string) {
   }
 
   return '0.00'
+}
+
+export const etherDecimal = (decimal: number) => {
+  return 10 ** decimal
 }

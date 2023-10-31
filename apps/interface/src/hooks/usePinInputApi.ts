@@ -15,7 +15,7 @@ export const usePinInputApi = (id: string, nextFocusElementId: string) => {
       type: 'numeric',
       mask: true,
       // onComplete(_) {
-      onValueComplete() {
+      onComplete() {
         if (nextFocusElementId) {
           const nextFocusElement = document.getElementById(nextFocusElementId)
           if (!nextFocusElement) return
