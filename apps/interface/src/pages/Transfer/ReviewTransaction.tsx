@@ -6,7 +6,7 @@ import { middleEllipsis, normalizefromE18Decimal } from '../../utils/utils'
 import { useAccountContextState } from '../context/AccountContextProvider'
 
 import { USDC_USD, USD_THB } from '../../utils/constants'
-import { CreateInitTransferRequestButton } from './CreateInitRequest'
+import { CreateInitTransferRequestButton } from './CreateInitRequestButton'
 import { parseEther } from 'viem'
 import { usdc } from '../../configs/tokens'
 
