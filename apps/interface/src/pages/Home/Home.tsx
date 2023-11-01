@@ -13,19 +13,19 @@ import { tokenPrices } from '../../configs/prices'
 import { useMemo } from 'react'
 
 export const Home = () => {
-  const { account, assetBalances } = useAccountContextState()
+  const { account, tokenBalances } = useAccountContextState()
   if (!account) return <ConnectWalletPage />
   // if (isAaNeeded) return <CreateSpendingWallet />
   const navigate = useNavigate()
 
   const { usableBalance: _, usableValue } = useMemo(() => {
-    if (!assetBalances) return { usableBalance: 0, usableValue: 0 }
+    if (!tokenBalances) return { usableBalance: 0, usableValue: 0 }
 
     const { _usableBalance, _usableValue } = onlyShowAssets.reduce(
       (acc, asset) => {
         const _balances =
           acc._usableBalance +
-          Number(assetBalances[asset.displaySymbol]) /
+          Number(tokenBalances[asset.displaySymbol]) /
             etherDecimal(asset.decimal)
 
         const _values =
@@ -44,15 +44,15 @@ export const Home = () => {
       usableBalance: _usableBalance,
       usableValue: _usableValue,
     }
-  }, [assetBalances])
+  }, [tokenBalances])
 
   return (
     <Container>
       <div className="w-full rounded-xl bg-blue-600 p-4 text-white">
         <div className="text-sm text-blue-200">Usable balance</div>
         <div className="text-2xl font-medium">
-          ฿
-          {assetBalances ? (
+          ฿{' '}
+          {tokenBalances ? (
             <>{usableValue.toLocaleString('TH') ?? 0}</>
           ) : (
             <Skeleton className="w-32" />
@@ -83,18 +83,18 @@ export const Home = () => {
                 <div className="text-sm text-slate-400">{asset.name}</div>
               </div>
               <div className="text-right">
-                {assetBalances ? (
+                {tokenBalances ? (
                   <>
                     <div>
                       {(
-                        Number(assetBalances[asset.displaySymbol]) /
+                        Number(tokenBalances[asset.displaySymbol]) /
                         etherDecimal(asset.decimal)
                       ).toLocaleString() ?? 0}{' '}
                       {asset.displaySymbol}
                     </div>
                     <div className="text-sm text-slate-400">
                       {(
-                        ((Number(assetBalances[asset.displaySymbol]) *
+                        ((Number(tokenBalances[asset.displaySymbol]) *
                           tokenPrices[asset.displaySymbol]) /
                           etherDecimal(asset.decimal)) *
                         USD_THB

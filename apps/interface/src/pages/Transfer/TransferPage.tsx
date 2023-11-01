@@ -9,7 +9,7 @@ import { USDC_USD, USD_THB } from '../../utils/constants'
 import ReviewTransaction from './ReviewTransaction'
 
 const TransferPage = () => {
-  const { account, assetBalances } = useAccountContextState()
+  const { account, tokenBalances } = useAccountContextState()
   const [toWallet, setToWallet] = useState<string | undefined>(undefined)
   const [amountIn, setAmountIn] = useState('0.00')
   const [isReview, setIsReview] = useState(false)
@@ -49,17 +49,17 @@ const TransferPage = () => {
           </div>
         </div>
         <div className="text-right">
-          {assetBalances ? (
+          {tokenBalances ? (
             <>
               <div>
                 {(
-                  ((Number(assetBalances['USDC']) * USDC_USD) / 1e6) *
+                  ((Number(tokenBalances['USDC']) * USDC_USD) / 1e6) *
                   USD_THB
                 ).toLocaleString('TH') ?? 0}
                 ฿
               </div>
               <div className="text-sm text-slate-400">
-                {(Number(assetBalances['USDC']) / 1e6).toLocaleString() ?? 0}{' '}
+                {(Number(tokenBalances['USDC']) / 1e6).toLocaleString() ?? 0}{' '}
                 USDC
               </div>
             </>

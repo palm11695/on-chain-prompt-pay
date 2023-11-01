@@ -56,3 +56,13 @@ export const simplifyAmount = (amount?: string) => {
 export const etherDecimal = (decimal: number) => {
   return 10 ** decimal
 }
+
+export const denormalizeToE18Decimal = (amount: bigint, decimal: number) => {
+  const exp = 18 - decimal
+  return amount * BigInt(etherDecimal(exp))
+}
+
+export const normalizefromE18Decimal = (amount: bigint, decimal: number) => {
+  const exp = 18 - decimal
+  return amount / BigInt(etherDecimal(exp))
+}

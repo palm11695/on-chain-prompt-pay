@@ -1,8 +1,13 @@
+import { ITokenAllowanceMap, ITokenBalanceMap } from '../../types'
+
 export interface IAccountContextState {
   account: string | undefined
   // aaAccountData: string | undefined
   // aaAccountAddress: Address | undefined
   // isAaNeeded: boolean
-  assetBalances: Record<string, bigint> | undefined
+  tokenBalances: ITokenBalanceMap | undefined
+  tokenAllowances: ITokenAllowanceMap | undefined
 }
-export interface IAccountContextAction {}
+export interface IAccountContextAction {
+  refetchTokenAllowances: () => void
+}

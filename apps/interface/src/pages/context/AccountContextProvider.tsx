@@ -3,7 +3,7 @@ import { Context, ReactNode, createContext, useContext } from 'react'
 import { IAccountContextState, IAccountContextAction } from './interfaces'
 import { useAccount } from 'wagmi'
 import { tokens } from '../../configs/tokens'
-import { useTokenBalances } from '../../hooks/useTokenBalances'
+import { useBundleTokenStates } from '../../hooks/useBundleTokenStates'
 import { usePageChain } from '../../hooks/usePageChain'
 
 const ContextState: Context<IAccountContextState | null> =
@@ -35,17 +35,24 @@ export const AccountContextProvider = ({
   //   return false
   // }, [address, aaAccountAddress])
 
-  const assetBalances = useTokenBalances(tokens, chain.id, address)
+  const {
+    tokenBalances,
+    tokenAllowances,
+    refetch: refetchTokenAllowances,
+  } = useBundleTokenStates(tokens, chain.id, address)
 
   return (
     <ContextState.Provider
       value={{
         account: address,
-        assetBalances,
+        tokenBalances,
+        tokenAllowances,
         // , aaAccountData, aaAccountAddress, isAaNeeded
       }}
     >
-      <ContextAction.Provider value={{}}>{children}</ContextAction.Provider>
+      <ContextAction.Provider value={{ refetchTokenAllowances }}>
+        {children}
+      </ContextAction.Provider>
     </ContextState.Provider>
   )
 }
@@ -62,12 +69,12 @@ export const useAccountContextState = (): IAccountContextState => {
   return context
 }
 
-export const useHomePageContextActions = (): IAccountContextAction => {
+export const useAccountContextActions = (): IAccountContextAction => {
   const context: IAccountContextAction | null = useContext(ContextAction)
 
   if (!context) {
     throw new Error(
-      'useHomePageContextActions must be used within a AccountContextProvider',
+      'useAccountContextActions must be used within a AccountContextProvider',
     )
   }
 

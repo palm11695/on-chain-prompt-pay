@@ -2,10 +2,13 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import Button from '../../components/Button'
 import Container from '../../components/Container'
 import { useEffect, useState } from 'react'
-import { middleEllipsis } from '../../utils/utils'
+import { middleEllipsis, normalizefromE18Decimal } from '../../utils/utils'
 import { useAccountContextState } from '../context/AccountContextProvider'
 
 import { USDC_USD, USD_THB } from '../../utils/constants'
+import { CreateInitTransferRequestButton } from './CreateInitRequest'
+import { parseEther } from 'viem'
+import { usdc } from '../../configs/tokens'
 
 interface IReviewTransactionProps {
   spender?: string
@@ -80,7 +83,10 @@ const ReviewTransaction = ({
       </div>
 
       <div className="fixed bottom-0 left-0 flex w-full flex-col gap-y-2 px-4 pb-4">
-        <Button>Confirm and Pay</Button>
+        <CreateInitTransferRequestButton
+          amount={normalizefromE18Decimal(parseEther(amount), usdc.decimal)}
+          asset={usdc}
+        />
         <Button
           variant="danger"
           onClick={() => {
