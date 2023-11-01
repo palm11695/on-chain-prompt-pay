@@ -14,7 +14,7 @@ export default defineConfig({
     foundry({
       artifacts: 'out/',
       project: '../contract',
-      include: ['Counter.sol/*'],
+      include: ['Counter.sol/*', 'PaymentHandler.sol/*'],
     }),
     actions(),
     react(),
