@@ -3,3 +3,4 @@ packages:
   - 'contract'
   - '!contract/lib/**'
   - 'sdk'
+  - 'circuits'
