@@ -7,9 +7,11 @@ import {
 import { ITokenProfile } from '../../configs/tokens'
 import { ContractKey, contracts } from '../../configs/contract'
 import { usePrepareApprove } from '../../hooks/usePrepareWrite/usePrepareApprove'
-import { Address } from 'viem'
+import { Address, zeroAddress } from 'viem'
 import { useSignExchangeRate } from '../../hooks/useSignExchangeRate'
 import { useExchangeRates } from '../../hooks/useExchangeRates'
+import { usePrepareCreateInitTransferRequest } from '../../hooks/usePrepareWrite/usePrepareCreateInitTransferRequest'
+import { useNavigate } from 'react-router-dom'
 
 interface ICreateInitTransferRequestCalldata {
   amount: bigint
@@ -28,9 +30,9 @@ export const CreateInitTransferRequestButton = ({
   asset,
 }: ICreateInitTransferRequestCalldata) => {
   // contexts
-  const { tokenAllowances } = useAccountContextState()
+  const { tokenAllowances, account } = useAccountContextState()
   const { refetchTokenAllowances } = useAccountContextActions()
-
+  const navigate = useNavigate()
   // hooks
   const exchangeRates = useExchangeRates()
 
@@ -52,9 +54,26 @@ export const CreateInitTransferRequestButton = ({
     onSuccess: () => refetchTokenAllowances(),
   })
 
-  const { handelSignExchangeRate, isSigning, verifiedMessage } =
-    useSignExchangeRate({ exchangeRate: exchangeRates[asset.displaySymbol] })
+  // use sign exchange rate
+  const { handleSignExchangeRate, isSigning, verifiedMessage, deadline } =
+    useSignExchangeRate({
+      exchangeRate: exchangeRates[asset.displaySymbol],
+      account: (account as Address) ?? zeroAddress,
+    })
 
+  const { write: _createInitTransferRequest, isLoading: _isCreating } =
+    usePrepareCreateInitTransferRequest({
+      calldata: {
+        thbAmount: amount,
+        exchangeRate: exchangeRates[asset.displaySymbol],
+        deadline: deadline,
+        verifiedMessage: verifiedMessage,
+      },
+      onSuccess: () => setTimeout(() => navigate('/'), 5000),
+    })
+  console.log('_createInitTransferRequest:', _createInitTransferRequest)
+
+  // build label, disable, action
   const { label, disabled, action } = useMemo(() => {
     if (isApprovalNeeded === undefined)
       return { ...defaultButtonValidation, disabled: true }
@@ -85,11 +104,11 @@ export const CreateInitTransferRequestButton = ({
       return {
         ...defaultButtonValidation,
         label: 'Sign Message',
-        action: handelSignExchangeRate,
+        action: handleSignExchangeRate,
       }
     }
 
-    return { ...defaultButtonValidation }
+    return { ...defaultButtonValidation, action: _createInitTransferRequest }
   }, [isApprovalNeeded, verifiedMessage, isSigning])
 
   return (
