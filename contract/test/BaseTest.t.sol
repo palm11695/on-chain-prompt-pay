@@ -28,10 +28,10 @@ contract BaseTest is Test {
   }
 
   function _operatorSign(
-    uint256 _exchangeRate,
+    uint16 _exchangeRateBps,
     uint256 _deadline
   ) internal view returns (uint8 v, bytes32 r, bytes32 s) {
-    bytes32 messageHash = keccak256(abi.encodePacked(_exchangeRate, _deadline));
+    bytes32 messageHash = keccak256(abi.encodePacked(_exchangeRateBps, _deadline));
     return vm.sign(operatorPrivateKey, messageHash);
   }
 }
