@@ -3,17 +3,19 @@ pragma solidity 0.8.21;
 
 import { ERC20 } from "@solmate/tokens/ERC20.sol";
 import { Test, console2 } from "forge-std/Test.sol";
-import { VmSafe } from "forge-std/VM.sol";
+import { Vm } from "forge-std/VM.sol";
 
 import { MockERC20 } from "./mocks/MockERC20.sol";
 
 contract BaseTest is Test {
+  address internal constant VM_ADDR = address(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
   address internal constant DEPLOYER = address(0x01);
   address internal constant ALICE = address(0x11);
   address internal constant BOB = address(0x12);
 
   uint256 internal immutable operatorPrivateKey;
   MockERC20 internal immutable usdc;
+  Vm internal immutable vm = Vm(VM_ADDR);
 
   constructor() {
     vm.label(DEPLOYER, "DEPLOYER");

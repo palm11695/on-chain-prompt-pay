@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.21;
 
 // libraries
@@ -8,6 +8,7 @@ import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 // interfaces
 import { IPaymentHandler } from "./interfaces/IPaymentHandler.sol";
+import { IDKIMRegistry } from "./interfaces/IDKIMRegistry.sol";
 
 contract PaymentHandler is IPaymentHandler {
   using SafeTransferLib for ERC20;
@@ -32,7 +33,10 @@ contract PaymentHandler is IPaymentHandler {
   // === States ===
 
   ERC20 public immutable token;
+  IDKIMRegistry public immutable dkimRegistry;
+
   uint16 public constant MAX_BPS = 10000;
+  string public constant BANK_DOMAIN = "kasikornbank.com";
 
   address public operator;
   uint256 public nextTransferRequestId;
@@ -40,10 +44,11 @@ contract PaymentHandler is IPaymentHandler {
   mapping(uint256 reqId => TransferRequest info) public transferRequests;
   mapping(uint256 reqId => bool isTransfered) public isTransferRequestConfirmed;
 
-  constructor(address _token, address _operator) {
+  constructor(address _token, address _operator, address _dkimRegistry) {
     token = ERC20(_token);
     operator = _operator;
     nextTransferRequestId = 0;
+    dkimRegistry = IDKIMRegistry(_dkimRegistry);
   }
 
   modifier onlyOperator() {
@@ -53,13 +58,25 @@ contract PaymentHandler is IPaymentHandler {
     _;
   }
 
-  // check sign message is from operator
   function _verifyMessage(uint16 _exchangeRateBps, uint256 _deadline, uint8 _v, bytes32 _r, bytes32 _s) internal view {
     bytes32 hash = keccak256(abi.encodePacked(_exchangeRateBps, _deadline));
     address signer = ECDSA.recover(hash, _v, _r, _s);
 
     if (signer != operator) {
       revert PaymentHandler_SignerIsNotOperator();
+    }
+  }
+
+  function _verifyDKIMPublicKeyHash(uint256 _signal) internal view {
+    bytes32 circuitKeyHash = bytes32(_signal);
+    bytes32 storedKeyHash = dkimRegistry.getDKIMPublicKeyHash(BANK_DOMAIN);
+
+    if (circuitKeyHash == bytes32(0) || storedKeyHash == bytes32(0)) {
+      revert PaymentHandler_KeyHashIsZero();
+    }
+
+    if (circuitKeyHash != storedKeyHash) {
+      revert PaymentHandler_InvalidSignal();
     }
   }
 
@@ -143,7 +160,7 @@ contract PaymentHandler is IPaymentHandler {
     delete transferRequests[_transferRequestId];
   }
 
-  function confirmTransferRequest(uint256 _transferRequestId) external override onlyOperator {
+  function confirmTransferRequest(uint256 _transferRequestId, uint256 _signal) external override onlyOperator {
     // revert if no transfer request
     if (nextTransferRequestId == 0 || _transferRequestId >= nextTransferRequestId) {
       revert PaymentHandler_NoTransferRequest();
@@ -161,6 +178,11 @@ contract PaymentHandler is IPaymentHandler {
     if (req.deadline < block.timestamp) {
       revert PaymentHandler_ExceedDeadline();
     }
+
+    // verify DKIM public key hash between on-chain and circuit
+    _verifyDKIMPublicKeyHash(_signal);
+
+    // TODO: verify RSA and proof
 
     // transfer token from this contract to operator
     token.safeTransfer(operator, req.tokenAmount);
