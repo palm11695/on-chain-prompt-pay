@@ -1,15 +1,27 @@
 import { useMemo, useState } from 'react'
-import { encodePacked, keccak256 } from 'viem'
+import { Signature, encodePacked, hexToSignature, keccak256 } from 'viem'
 import { useSignMessage } from 'wagmi'
 import { useBlock } from './useBlock'
+import { Bytes } from '../types'
 
 interface IUseSignExchangeRate {
+  signedMessage: Bytes | undefined
+  verifiedMessage: Signature | undefined
+  handelSignExchangeRate: () => void
+  isSigning: boolean
+  isError: Error | undefined
+}
+
+interface IUseSignExchangeRateProps {
   exchangeRate: bigint
 }
-export const useSignExchangeRate = ({ exchangeRate }: IUseSignExchangeRate) => {
+
+export const useSignExchangeRate = ({
+  exchangeRate,
+}: IUseSignExchangeRateProps): IUseSignExchangeRate => {
   const [isSigning, setIsSigning] = useState(false)
   const [isError, setError] = useState<Error | undefined>(undefined)
-  const [signedMessage, setSignedMessage] = useState<string | undefined>(
+  const [signedMessage, setSignedMessage] = useState<Bytes | undefined>(
     undefined,
   )
   const block = useBlock()
@@ -44,8 +56,15 @@ export const useSignExchangeRate = ({ exchangeRate }: IUseSignExchangeRate) => {
     signMessage()
   }
 
+  const _verifiedMessage: Signature | undefined = useMemo(() => {
+    if (!signedMessage) return undefined
+
+    return hexToSignature(signedMessage as Bytes)
+  }, [signedMessage])
+
   return {
     signedMessage: signedMessage,
+    verifiedMessage: _verifiedMessage,
     handelSignExchangeRate: handleSign,
     isSigning,
     isError,

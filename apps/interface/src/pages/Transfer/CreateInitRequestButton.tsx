@@ -52,7 +52,7 @@ export const CreateInitTransferRequestButton = ({
     onSuccess: () => refetchTokenAllowances(),
   })
 
-  const { handelSignExchangeRate, isSigning, signedMessage } =
+  const { handelSignExchangeRate, isSigning, verifiedMessage } =
     useSignExchangeRate({ exchangeRate: exchangeRates[asset.displaySymbol] })
 
   const { label, disabled, action } = useMemo(() => {
@@ -74,7 +74,7 @@ export const CreateInitTransferRequestButton = ({
       }
 
     // Sign Message
-    if (!signedMessage) {
+    if (!verifiedMessage) {
       if (isSigning)
         return {
           ...defaultButtonValidation,
@@ -90,7 +90,7 @@ export const CreateInitTransferRequestButton = ({
     }
 
     return { ...defaultButtonValidation }
-  }, [isApprovalNeeded, signedMessage, isSigning])
+  }, [isApprovalNeeded, verifiedMessage, isSigning])
 
   return (
     <Button disabled={disabled} onClick={() => action && action()}>

@@ -10,3 +10,5 @@ export type ITokenAllowanceMap = Record<
 >
 
 export type IContractAddressMap = Record<ContractKey, string>
+
+export type Bytes = `0x${string}`
