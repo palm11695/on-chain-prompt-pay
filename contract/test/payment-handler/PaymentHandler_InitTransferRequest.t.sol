@@ -72,6 +72,11 @@ contract PaymentHandlerInitTransferRequestTest is PaymentHandlerBaseTest {
     // should revert when exchange rate is greater than MAX_BPS
     vm.expectRevert(IPaymentHandler.PaymentHandler_InvalidParams.selector);
     paymentHandler.initTransferRequest(0, block.timestamp, 10001, uint8(1), bytes32("0x"), bytes32("0x"));
+
+    // should revert when thbAmount and exchange rate is too low
+    (uint8 v, bytes32 r, bytes32 s) = _operatorSign(1, block.timestamp);
+    vm.expectRevert(IPaymentHandler.PaymentHandler_InvalidParams.selector);
+    paymentHandler.initTransferRequest(1, block.timestamp, 1, v, r, s);
   }
 
   function testRevert_WhenInitTransferRequest_AndDeadlineExceed() public {

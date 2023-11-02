@@ -86,6 +86,9 @@ contract PaymentHandler is IPaymentHandler {
 
     // calculate balance to lock
     uint256 tokenAmount = (_thbAmount * _exchangeRateBps) / MAX_BPS;
+    if (tokenAmount == 0) {
+      revert PaymentHandler_InvalidParams();
+    }
 
     // safe pull token from sender
     token.safeTransferFrom(msg.sender, address(this), tokenAmount);
