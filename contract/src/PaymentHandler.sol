@@ -32,6 +32,7 @@ contract PaymentHandler is IPaymentHandler {
   // === States ===
 
   ERC20 public immutable token;
+  uint16 public constant MAX_BPS = 10000;
 
   address public operator;
   uint256 public nextTransferRequestId;
@@ -53,8 +54,8 @@ contract PaymentHandler is IPaymentHandler {
   }
 
   // check sign message is from operator
-  function _verifyMessage(uint256 _exchangeRate, uint256 _deadline, uint8 _v, bytes32 _r, bytes32 _s) internal view {
-    bytes32 hash = keccak256(abi.encodePacked(_exchangeRate, _deadline));
+  function _verifyMessage(uint16 _exchangeRateBps, uint256 _deadline, uint8 _v, bytes32 _r, bytes32 _s) internal view {
+    bytes32 hash = keccak256(abi.encodePacked(_exchangeRateBps, _deadline));
     address signer = ECDSA.recover(hash, _v, _r, _s);
 
     if (signer != operator) {
@@ -64,15 +65,15 @@ contract PaymentHandler is IPaymentHandler {
 
   function initTransferRequest(
     uint256 _thbAmount,
-    uint256 _exchangeRate,
     uint256 _deadline,
+    uint16 _exchangeRateBps,
     uint8 _v,
     bytes32 _r,
     bytes32 _s
   ) external override {
     // revert if thbAmount and/or exchangeRate is zero
-    if (_thbAmount == 0 || _exchangeRate == 0) {
-      revert PaymentHandler_AmountIsZero();
+    if (_thbAmount == 0 || _exchangeRateBps == 0 || _exchangeRateBps > MAX_BPS) {
+      revert PaymentHandler_InvalidParams();
     }
 
     // revert if deadline is passed
@@ -81,10 +82,10 @@ contract PaymentHandler is IPaymentHandler {
     }
 
     // verify sign message is from operator
-    _verifyMessage(_exchangeRate, _deadline, _v, _r, _s);
+    _verifyMessage(_exchangeRateBps, _deadline, _v, _r, _s);
 
     // calculate balance to lock
-    uint256 tokenAmount = _thbAmount * _exchangeRate;
+    uint256 tokenAmount = (_thbAmount * _exchangeRateBps) / MAX_BPS;
 
     // safe pull token from sender
     token.safeTransferFrom(msg.sender, address(this), tokenAmount);
@@ -95,7 +96,7 @@ contract PaymentHandler is IPaymentHandler {
     transferRequests[nextTransferRequestId] = TransferRequest(msg.sender, tokenAmount, block.timestamp, _deadline);
 
     // emit event with id to notify operator
-    emit TransferRequestInitiated(nextTransferRequestId, msg.sender, _thbAmount, _exchangeRate, _deadline);
+    emit TransferRequestInitiated(nextTransferRequestId, msg.sender, _thbAmount, _exchangeRateBps, _deadline);
 
     unchecked {
       ++nextTransferRequestId;
