@@ -32,29 +32,29 @@ template KBankVerifier(max_header_bytes, max_body_bytes, n, k, pack_size) {
 
     pubkey_hash <== EV.pubkey_hash;
 
-    // Body reveal vars
-    var max_twitter_len = 21;
-    var max_twitter_packed_bytes = count_packed(max_twitter_len, pack_size); // ceil(max_num_bytes / 7)
-    signal input twitter_username_idx;
-    signal output reveal_twitter_packed[max_twitter_packed_bytes];
+    // // Body reveal vars
+    // var max_twitter_len = 21;
+    // var max_twitter_packed_bytes = count_packed(max_twitter_len, pack_size); // ceil(max_num_bytes / 7)
+    // signal input twitter_username_idx;
+    // signal output reveal_twitter_packed[max_twitter_packed_bytes];
     
-    // var account_len = 13;
-    // var num_bytes_account_packed = count_packed(account_len, pack_size); // ceil(max_num_bytes / 7)
-    // signal input account_idx;
-    // signal output reveal_account_packed[num_bytes_account_packed];
+    // // var account_len = 13;
+    // // var num_bytes_account_packed = count_packed(account_len, pack_size); // ceil(max_num_bytes / 7)
+    // // signal input account_idx;
+    // // signal output reveal_account_packed[num_bytes_account_packed];
 
-    // signal () <== KbankAccountRegex(max_body_bytes, num_bytes_account_packed, 1)(in_body_padded, account_idx);
+    // // signal () <== KbankAccountRegex(max_body_bytes, num_bytes_account_packed, 1)(in_body_padded, account_idx);
 
-    // TWITTER REGEX: 328,044 constraints
-    // This computes the regex states on each character in the email body. For new emails, this is the
-    // section that you want to swap out via using the zk-regex library.
-    signal (twitter_regex_out, twitter_regex_reveal[max_body_bytes]) <== TwitterResetRegex(max_body_bytes)(in_body_padded);
-    // This ensures we found a match at least once (i.e. match count is not zero)
-    signal is_found_twitter <== IsZero()(twitter_regex_out);
-    is_found_twitter === 0;
+    // // TWITTER REGEX: 328,044 constraints
+    // // This computes the regex states on each character in the email body. For new emails, this is the
+    // // section that you want to swap out via using the zk-regex library.
+    // signal (twitter_regex_out, twitter_regex_reveal[max_body_bytes]) <== TwitterResetRegex(max_body_bytes)(in_body_padded);
+    // // This ensures we found a match at least once (i.e. match count is not zero)
+    // signal is_found_twitter <== IsZero()(twitter_regex_out);
+    // is_found_twitter === 0;
 
-    // PACKING: 16,800 constraints (Total: 3,115,057)
-    reveal_twitter_packed <== ShiftAndPackMaskedStr(max_body_bytes, max_twitter_len, pack_size)(twitter_regex_reveal, twitter_username_idx);
+    // // PACKING: 16,800 constraints (Total: 3,115,057)
+    // reveal_twitter_packed <== ShiftAndPackMaskedStr(max_body_bytes, max_twitter_len, pack_size)(twitter_regex_reveal, twitter_username_idx);
 }
 
 // In circom, all output signals of the main component are public (and cannot be made private), the input signals of the main component are private if not stated otherwise using the keyword public as above. The rest of signals are all private and cannot be made public.
