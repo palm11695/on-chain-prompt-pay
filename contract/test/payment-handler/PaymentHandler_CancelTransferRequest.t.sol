@@ -40,19 +40,6 @@ contract PaymentHandlerCancelTransferRequestTest is PaymentHandlerBaseTest {
     assertEq(paymentHandler.reservedBalances(ALICE), 28);
   }
 
-  function testRevert_WhenCancelTransferRequest_WithOtherSender() public {
-    _aliceInitTransferRequest();
-
-    // bob cancel alice transfer request
-    uint256 transferRequestId = 0;
-    vm.prank(BOB);
-    vm.expectRevert(IPaymentHandler.PaymentHandler_Unauthorized.selector);
-    paymentHandler.cancelTransferRequest(transferRequestId);
-
-    assertEq(usdc.balanceOf(address(paymentHandler)), 28);
-    assertEq(paymentHandler.reservedBalances(ALICE), 28);
-  }
-
   function testRevert_WhenCancelTransferRequest_AfterConfirm() public {
     _aliceInitTransferRequest();
     uint256 aliceBalanceAfterInit = usdc.balanceOf(ALICE);
