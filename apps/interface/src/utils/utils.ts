@@ -1,4 +1,4 @@
-import { SpenderType } from '../pages/Reader/QrCodeReader'
+import { ReceiverType } from '../pages/Reader/QrCodeReader'
 
 export const parseAddressFromEncryptedWallet = (encryptedWallet: string) => {
   return encryptedWallet ? `0x${JSON.parse(encryptedWallet).address}` : ''
@@ -14,7 +14,7 @@ export const simplifyPromptPayAccount = (
 ): string => {
   const parts = []
   if (value) {
-    if (accountType === SpenderType.ID_Card.toString()) {
+    if (accountType === ReceiverType.ID_Card.toString()) {
       const idIndices = [0, 1, 5, 10, 12, 13]
 
       for (let i = 0; i < idIndices.length; i++) {

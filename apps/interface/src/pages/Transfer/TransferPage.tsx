@@ -1,113 +1,221 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 import Button from '../../components/Button'
 import Container from '../../components/Container'
-import { useEffect, useState } from 'react'
-import { middleEllipsis } from '../../utils/utils'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { normalizefromE18Decimal } from '../../utils/utils'
 import { useAccountContextState } from '../context/AccountContextProvider'
-import Skeleton from 'react-loading-skeleton'
-import { USDC_USD, USD_THB } from '../../utils/constants'
-import ReviewTransaction from './ReviewTransaction'
+import LoadingPage from '../Loading/Loading'
+import { AccountSection } from '../../components/AccountSection'
+import { ITokenProfile, usdc } from '../../configs/tokens'
+import { TransferInput } from '../../components/TransferInput'
+import { ReceiverType } from '../Reader/QrCodeReader'
+import { parseEther, zeroAddress } from 'viem'
+import { CreateInitTransferRequestButton } from './CreateInitRequestButton'
+import { ReviewTxSummary } from '../../components/ReviewTxSummary'
+
+export enum ActionStatus {
+  Transfer = 'Transfer',
+  Review = 'Review',
+}
 
 const TransferPage = () => {
+  const [isLoading, setIsLoading] = useState(true)
   const { account, tokenBalances } = useAccountContextState()
-  const [toWallet, setToWallet] = useState<string | undefined>(undefined)
+  const [receiver, setReceiver] = useState<string | undefined>(undefined)
   const [amountIn, setAmountIn] = useState('0.00')
-  const [isReview, setIsReview] = useState(false)
+  const [receiverType, setReceiverType] = useState<ReceiverType | null>(null)
+  const [status, setStatus] = useState<ActionStatus>(ActionStatus.Transfer)
   const navigate = useNavigate()
+
+  // make component loading
+  useEffect(() => {
+    setTimeout(() => {
+      setIsLoading(false)
+    }, 1500)
+  }, [status])
 
   // effect search params
   const { search } = useLocation()
   useEffect(() => {
-    const transferTo = new URLSearchParams(search).get('transferTo')
+    const receiverType = new URLSearchParams(search).get(
+      'type',
+    ) as ReceiverType | null
+    const receiver = new URLSearchParams(search).get('receiver')
     const amount = new URLSearchParams(search).get('amount')
 
-    if (transferTo) {
-      setToWallet(transferTo)
-      if (amount) setAmountIn(amount)
-    }
+    setReceiverType(receiverType)
+    setReceiver(receiver ?? undefined)
+    setAmountIn(amount ?? '0')
   }, [search])
 
-  return isReview ? (
-    <ReviewTransaction
-      spender={toWallet}
-      amount={amountIn}
-      onCancel={() => setIsReview(false)}
-    />
-  ) : (
+  const handleCancel = useCallback(() => {
+    if (status === ActionStatus.Review) setStatus(ActionStatus.Transfer)
+    if (status === ActionStatus.Transfer) navigate('/loading')
+    setIsLoading(true)
+  }, [status])
+
+  const loadingLabel = useMemo(() => {
+    return status === ActionStatus.Transfer
+      ? 'Loading...'
+      : 'Fetching best quote...'
+  }, [status])
+
+  return (
     <Container>
-      <div className="text-xl font-semibold">Transfer</div>
-
-      <div className="h-6" />
-
-      <div className="font-semibold">From</div>
-      <div className="h-2" />
-      <div className="flex items-center justify-between">
-        <div>
-          <div>Spending wallet</div>
-          <div className="text-sm text-slate-400">
-            {account && middleEllipsis(account)}
-          </div>
-        </div>
-        <div className="text-right">
-          {tokenBalances ? (
-            <>
-              <div>
-                {(
-                  ((Number(tokenBalances['USDC']) * USDC_USD) / 1e6) *
-                  USD_THB
-                ).toLocaleString('TH') ?? 0}
-                ฿
-              </div>
-              <div className="text-sm text-slate-400">
-                {(Number(tokenBalances['USDC']) / 1e6).toLocaleString() ?? 0}{' '}
-                USDC
-              </div>
-            </>
-          ) : (
-            <Skeleton className="w-32" />
-          )}
-        </div>
-      </div>
-
-      <div className="h-6" />
-
-      <div className="font-semibold">To</div>
-      <div className="h-2" />
-      <div className="flex items-center justify-between">
-        <div>
-          <div>{toWallet}</div>
-          <div className="text-sm text-slate-400">PromptPay</div>
-        </div>
-      </div>
-
-      <div className="h-6" />
-
-      <div className="font-semibold">Amount</div>
-      <div className="relative border-b border-slate-300 focus-within:border-blue-400">
-        <input
-          className="w-full bg-transparent pr-4 text-right text-lg outline-none"
-          placeholder="0.00"
-          type="number"
-          value={amountIn}
-          onChange={(e) => setAmountIn(e.target.value)}
+      {isLoading ? (
+        <LoadingPage isComponent label={loadingLabel} />
+      ) : status === ActionStatus.Transfer ? (
+        <TransferContent
+          status={status}
+          label="Spending wallet"
+          token={usdc}
+          account={account ?? zeroAddress}
+          balance={tokenBalances?.[usdc.displaySymbol]}
+          receiver={receiver ?? ''}
+          receiverType={receiverType ?? ReceiverType.PromptPay}
+          showBalance
+          amountIn={amountIn}
+          onChange={setAmountIn}
+          onClick={() => {
+            setIsLoading(true)
+            setStatus(ActionStatus.Review)
+          }}
+          onCancel={handleCancel}
         />
-        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-0.5 text-lg">
-          ฿
-        </div>
-      </div>
-      <div className="h-1" />
-      <div className="w-full text-right text-sm text-slate-400">
-        ~ {(Number(amountIn) / (USDC_USD * USD_THB)).toLocaleString()} USDC
-      </div>
-
-      <div className="fixed bottom-0 left-0 flex w-full flex-col gap-y-2 px-4 pb-4">
-        <Button onClick={() => setIsReview(true)}>Confirm and Pay</Button>
-        <Button variant="danger" onClick={() => navigate('/loading')}>
-          Cancel
-        </Button>
-      </div>
+      ) : (
+        <ReviewTxContent
+          status={status}
+          label="Spending wallet"
+          token={usdc}
+          account={account ?? zeroAddress}
+          balance={tokenBalances?.[usdc.displaySymbol]}
+          receiver={receiver ?? ''}
+          receiverType={receiverType ?? ReceiverType.PromptPay}
+          amountIn={amountIn}
+          onChange={setAmountIn}
+          onCancel={handleCancel}
+        />
+      )}
     </Container>
   )
 }
 
 export default TransferPage
+
+interface ITransferContent {
+  status: ActionStatus
+  label?: string
+  account: string
+  amountIn: string
+  receiver: string
+  receiverType: ReceiverType
+  balance: bigint | undefined
+  token: ITokenProfile
+  showBalance?: boolean
+  onChange: React.Dispatch<React.SetStateAction<string>>
+  onClick?: () => void
+  onCancel: () => void
+}
+
+const TransferContent = ({
+  status,
+  account,
+  amountIn,
+  balance,
+  receiver,
+  receiverType,
+  token,
+  onChange,
+  onClick,
+  onCancel,
+}: ITransferContent) => {
+  return (
+    <>
+      <AccountSection
+        status={status}
+        label="Spending wallet"
+        token={usdc}
+        account={account ?? zeroAddress}
+        balance={balance}
+        receiver={receiver ?? ''}
+        receiverType={receiverType ?? ReceiverType.PromptPay}
+        showBalance
+      />
+      <TransferInput amountIn={amountIn} onChange={onChange} token={token} />
+      <ValidationButton
+        status={status}
+        amountIn={amountIn}
+        token={token}
+        onClick={() => onClick?.()}
+        onCancel={onCancel}
+      />
+    </>
+  )
+}
+
+const ReviewTxContent = ({
+  status,
+  account,
+  amountIn,
+  balance,
+  receiver,
+  receiverType,
+  token,
+  onCancel,
+}: ITransferContent) => {
+  return (
+    <>
+      <AccountSection
+        status={status}
+        label="Spending wallet"
+        token={usdc}
+        account={account ?? zeroAddress}
+        balance={balance}
+        receiver={receiver ?? ''}
+        receiverType={receiverType ?? ReceiverType.PromptPay}
+      />
+      <ReviewTxSummary amount={amountIn} token={token} />
+      <ValidationButton
+        amountIn={amountIn}
+        token={token}
+        status={status}
+        onCancel={onCancel}
+      />
+    </>
+  )
+}
+
+const ValidationButton = ({
+  status,
+  amountIn,
+  token,
+  onClick,
+  onCancel,
+}: {
+  status: ActionStatus
+  amountIn: string
+  token: ITokenProfile
+  onClick?: React.Dispatch<React.SetStateAction<ActionStatus>>
+  onCancel: () => void
+}) => {
+  return (
+    <div className="fixed bottom-0 left-0 flex w-full flex-col gap-y-2 px-4 pb-4">
+      {status === ActionStatus.Review ? (
+        <CreateInitTransferRequestButton
+          amount={normalizefromE18Decimal(parseEther(amountIn), token.decimal)}
+          asset={token}
+        />
+      ) : (
+        <Button
+          onClick={() => onClick?.(ActionStatus.Review)}
+          disabled={Number(amountIn) <= 0}
+        >
+          Confirm and Pay
+        </Button>
+      )}
+      <Button variant="danger" onClick={onCancel}>
+        Cancel
+      </Button>
+    </div>
+  )
+}

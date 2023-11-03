@@ -11,9 +11,9 @@ const phoneRegex = /01130066(\d{9})/
 const idRegex = /0213(\d{13})/
 const amountRegex = /54\d{1,9}\.\d{2}/
 
-export enum SpenderType {
-  Phone = 'Phone user',
-  ID_Card = 'ID card',
+export enum ReceiverType {
+  PromptPay = 'PromptPay',
+  ID_Card = 'ID Card',
 }
 
 export const QrCodeReader = () => {
@@ -26,15 +26,20 @@ export const QrCodeReader = () => {
       const idMatch = data.match(idRegex)
       const phoneMatch = data.match(phoneRegex)
       const amountMatch = data.match(amountRegex)
-      const spenderType = idMatch ? SpenderType.ID_Card : SpenderType.Phone
+      const receiverType = idMatch
+        ? ReceiverType.ID_Card
+        : ReceiverType.PromptPay
 
       const sendValue =
-        spenderType === SpenderType.ID_Card ? idMatch?.[1] : phoneMatch?.[1]
-      const simplifiedAddress = simplifyPromptPayAccount(spenderType, sendValue)
+        receiverType === ReceiverType.ID_Card ? idMatch?.[1] : phoneMatch?.[1]
+      const simplifiedAddress = simplifyPromptPayAccount(
+        receiverType,
+        sendValue,
+      )
       const simplifiedAmount = simplifyAmount(amountMatch?.[0])
 
       navigate(
-        `/loading?goTo=transfer&type=${spenderType}&transferTo=${simplifiedAddress}&amount=${simplifiedAmount}`,
+        `/transfer?type=${receiverType}&receiver=${simplifiedAddress}&amount=${simplifiedAmount}`,
       )
     }
   }, [data])
