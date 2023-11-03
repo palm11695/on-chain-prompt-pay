@@ -5,6 +5,7 @@ pragma solidity 0.8.21;
 import { ERC20 } from "@solmate/tokens/ERC20.sol";
 import { SafeTransferLib } from "@solmate/utils/SafeTransferLib.sol";
 import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import { ZKVerifier } from "./ZKVerifier.sol";
 
 // interfaces
 import { IPaymentHandler } from "./interfaces/IPaymentHandler.sol";
@@ -36,10 +37,14 @@ contract PaymentHandler is IPaymentHandler {
   // === States ===
 
   ERC20 public immutable token;
+  ZKVerifier public immutable zkVerifier;
   IDKIMRegistry public immutable dkimRegistry;
 
   uint16 public constant MAX_BPS = 10000;
   string public constant BANK_DOMAIN = "kasikornbank.com";
+
+  // index in signal array
+  uint32 public constant publicKeyHashIndex = 0;
 
   // address public operator;
   uint256 public nextTransferRequestId;
@@ -47,9 +52,10 @@ contract PaymentHandler is IPaymentHandler {
   mapping(uint256 reqId => TransferRequest info) public transferRequests;
   mapping(uint256 reqId => bool isTransfered) public isTransferRequestConfirmed;
 
-  constructor(address _token, address _dkimRegistry) {
+  constructor(address _token, address _zkVerifier, address _dkimRegistry) {
     token = ERC20(_token);
     nextTransferRequestId = 0;
+    zkVerifier = ZKVerifier(_zkVerifier);
     dkimRegistry = IDKIMRegistry(_dkimRegistry);
   }
 
@@ -159,7 +165,11 @@ contract PaymentHandler is IPaymentHandler {
     delete transferRequests[_transferRequestId];
   }
 
-  function confirmTransferRequest(uint256 _transferRequestId, uint256 _signal) external override {
+  function confirmTransferRequest(
+    uint256 _transferRequestId,
+    uint256[8] memory _proof,
+    uint256[3] memory _signal
+  ) external override {
     // revert if no transfer request
     if (nextTransferRequestId == 0 || _transferRequestId >= nextTransferRequestId) {
       revert PaymentHandler_NoTransferRequest();
@@ -183,9 +193,19 @@ contract PaymentHandler is IPaymentHandler {
     }
 
     // verify DKIM public key hash between on-chain and circuit
-    _verifyDKIMPublicKeyHash(_signal);
+    _verifyDKIMPublicKeyHash(_signal[publicKeyHashIndex]);
 
-    // TODO: verify RSA and proof
+    // verify RSA and proof
+    if (
+      !zkVerifier.verifyProof(
+        [_proof[0], _proof[1]],
+        [[_proof[2], _proof[3]], [_proof[4], _proof[5]]],
+        [_proof[6], _proof[7]],
+        _signal
+      )
+    ) {
+      revert PaymentHandler_InvalidProof();
+    }
 
     // transfer token from this contract to operator
     token.safeTransfer(msg.sender, req.tokenAmount);
