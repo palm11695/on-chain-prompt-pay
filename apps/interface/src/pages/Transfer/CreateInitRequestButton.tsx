@@ -53,7 +53,7 @@ export const CreateInitTransferRequestButton = ({
       account: (account as Address) ?? zeroAddress,
     })
 
-  const { write: createInitTransferRequest, isLoading: _isCreating } =
+  const { write: createInitTransferRequest, isLoading: isCreating } =
     usePrepareCreateInitTransferRequest({
       calldata: {
         thbAmount: amount,
@@ -62,8 +62,8 @@ export const CreateInitTransferRequestButton = ({
         verifiedMessage: verifiedMessage,
       },
       onSuccess: () => {
-        setTimeout(() => navigate('/'), 5000)
         refetchTokenStates()
+        setTimeout(() => navigate('/loading'))
       },
     })
 
@@ -107,6 +107,14 @@ export const CreateInitTransferRequestButton = ({
         ...defaultButtonValidation,
         label: 'Sign Message',
         action: handleSignExchangeRate,
+      }
+    }
+
+    if (isCreating) {
+      return {
+        ...defaultButtonValidation,
+        label: 'Creating request...',
+        disabled: true,
       }
     }
 
