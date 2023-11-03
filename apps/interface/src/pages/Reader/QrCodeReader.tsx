@@ -51,7 +51,7 @@ export const QrCodeReader = () => {
         <QrScanner
           onDecode={(result) => {
             setData(result)
-            console.log(result)
+            // console.log(result)
           }}
           onError={(error) => console.log(error?.message)}
           containerStyle={{
