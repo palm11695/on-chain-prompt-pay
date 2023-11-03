@@ -136,7 +136,7 @@ importers:
         specifier: ^1.6.51
         version: 1.6.51
       snarkjs:
-        specifier: git+https://github.com/vb7401/snarkjs.git#24981febe8826b6ab76ae4d76cf7f9142919d2b8
+        specifier: github:vb7401/snarkjs#24981febe8826b6ab76ae4d76cf7f9142919d2b8
         version: github.com/vb7401/snarkjs/24981febe8826b6ab76ae4d76cf7f9142919d2b8
     devDependencies:
       '@types/node':

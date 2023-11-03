@@ -36,4 +36,6 @@ yarn-error.log*
 .vercel
 
 circuit.env
+entropy.env
 *.eml
+*.ptau
