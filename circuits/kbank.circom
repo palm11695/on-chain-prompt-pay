@@ -21,15 +21,16 @@ template KBankVerifier(max_header_bytes, max_body_bytes, n, k, pack_size) {
 
     signal output pubkey_hash;
 
-    component EV = EmailVerifier(max_header_bytes, max_body_bytes, n, k, 0);
+    // TODO: re-enable body hash check
+    component EV = EmailVerifier(max_header_bytes, max_body_bytes, n, k, 1);
     EV.in_padded <== in_padded;
     EV.pubkey <== pubkey;
     EV.signature <== signature;
     EV.in_len_padded_bytes <== in_len_padded_bytes;
-    EV.body_hash_idx <== body_hash_idx;
-    EV.precomputed_sha <== precomputed_sha;
-    EV.in_body_padded <== in_body_padded;
-    EV.in_body_len_padded_bytes <== in_body_len_padded_bytes;
+    // EV.body_hash_idx <== body_hash_idx;
+    // EV.precomputed_sha <== precomputed_sha;
+    // EV.in_body_padded <== in_body_padded;
+    // EV.in_body_len_padded_bytes <== in_body_len_padded_bytes;
 
     pubkey_hash <== EV.pubkey_hash;
 
@@ -50,16 +51,16 @@ template KBankVerifier(max_header_bytes, max_body_bytes, n, k, pack_size) {
     // // PACKING: 16,800 constraints (Total: 3,115,057)
     // reveal_twitter_packed <== ShiftAndPackMaskedStr(max_body_bytes, max_twitter_len, pack_size)(twitter_regex_reveal, twitter_username_idx);
 
-    // var account_len = 13;
-    // var num_bytes_account_packed = count_packed(account_len, pack_size); // ceil(max_num_bytes / 7)
-    // signal input account_idx;
-    // signal output reveal_account_packed[num_bytes_account_packed];
+    var account_len = 13;
+    var num_bytes_account_packed = count_packed(account_len, pack_size); // ceil(max_num_bytes / 7)
+    signal input account_idx;
+    signal output reveal_account_packed[num_bytes_account_packed];
 
-    // signal (total_occurence, account_regex_reveal[max_body_bytes]) <== KbankAccountRegex(max_body_bytes)(in_body_padded);
-    // signal is_found_account <== IsZero()(total_occurence);
-    // is_found_account === 0;
+    signal (total_occurence, account_regex_reveal[max_body_bytes]) <== KbankAccountRegex(max_body_bytes)(in_body_padded);
+    signal is_found_account <== IsZero()(total_occurence);
+    is_found_account === 0;
 
-    // reveal_account_packed <== ShiftAndPackMaskedStr(max_body_bytes, account_len, pack_size)(account_regex_reveal, account_idx);
+    reveal_account_packed <== ShiftAndPackMaskedStr(max_body_bytes, account_len, pack_size)(account_regex_reveal, account_idx);
 }
 
 // In circom, all output signals of the main component are public (and cannot be made private), the input signals of the main component are private if not stated otherwise using the keyword public as above. The rest of signals are all private and cannot be made public.
