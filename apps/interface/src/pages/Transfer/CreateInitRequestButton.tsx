@@ -31,18 +31,10 @@ export const CreateInitTransferRequestButton = ({
 }: ICreateInitTransferRequestCalldata) => {
   // contexts
   const { tokenAllowances, account } = useAccountContextState()
-  const { refetchTokenAllowances } = useAccountContextActions()
+  const { refetchTokenStates } = useAccountContextActions()
   const navigate = useNavigate()
   // hooks
   const exchangeRates = useExchangeRates()
-
-  const isApprovalNeeded: boolean | undefined = useMemo(() => {
-    if (!tokenAllowances) return undefined
-
-    return (
-      tokenAllowances[asset.displaySymbol][ContractKey.PaymentHandler] < amount
-    )
-  }, [amount, tokenAllowances])
 
   // use prepare write approve
   const { write: approveToken, isLoading: isApproving } = usePrepareApprove({
@@ -51,7 +43,7 @@ export const CreateInitTransferRequestButton = ({
       spender: contracts[ContractKey.PaymentHandler] as Address,
       amount,
     },
-    onSuccess: () => refetchTokenAllowances(),
+    onSuccess: () => refetchTokenStates(),
   })
 
   // use sign exchange rate
@@ -61,17 +53,27 @@ export const CreateInitTransferRequestButton = ({
       account: (account as Address) ?? zeroAddress,
     })
 
-  const { write: _createInitTransferRequest, isLoading: _isCreating } =
+  const { write: createInitTransferRequest, isLoading: _isCreating } =
     usePrepareCreateInitTransferRequest({
       calldata: {
         thbAmount: amount,
-        exchangeRate: exchangeRates[asset.displaySymbol],
         deadline: deadline,
+        exchangeRate: exchangeRates[asset.displaySymbol],
         verifiedMessage: verifiedMessage,
       },
-      onSuccess: () => setTimeout(() => navigate('/'), 5000),
+      onSuccess: () => {
+        setTimeout(() => navigate('/'), 5000)
+        refetchTokenStates()
+      },
     })
-  console.log('_createInitTransferRequest:', _createInitTransferRequest)
+
+  const isApprovalNeeded: boolean | undefined = useMemo(() => {
+    if (!tokenAllowances) return undefined
+
+    return (
+      tokenAllowances[asset.displaySymbol][ContractKey.PaymentHandler] < amount
+    )
+  }, [amount, tokenAllowances])
 
   // build label, disable, action
   const { label, disabled, action } = useMemo(() => {
@@ -108,8 +110,15 @@ export const CreateInitTransferRequestButton = ({
       }
     }
 
-    return { ...defaultButtonValidation, action: _createInitTransferRequest }
-  }, [isApprovalNeeded, verifiedMessage, isSigning])
+    return { ...defaultButtonValidation, action: createInitTransferRequest }
+  }, [
+    isApprovalNeeded,
+    verifiedMessage,
+    isSigning,
+    approveToken,
+    handleSignExchangeRate,
+    createInitTransferRequest,
+  ])
 
   return (
     <Button disabled={disabled} onClick={() => action && action()}>

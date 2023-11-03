@@ -49,7 +49,7 @@ export const usePrepareCreateInitTransferRequest = ({
   const { config: preparedConfig } =
     usePreparePaymentHandlerInitTransferRequest({
       address: contracts[ContractKey.PaymentHandler] as Address,
-      args: [thbAmount, exchangeRate, deadline, Number(v), r, s],
+      args: [thbAmount, deadline, Number(exchangeRate), Number(v), r, s],
       enabled: _enabled,
     })
 

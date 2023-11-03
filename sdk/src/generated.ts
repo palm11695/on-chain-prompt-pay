@@ -46,8 +46,8 @@ export const paymentHandlerABI = [
     name: 'ECDSAInvalidSignatureLength',
   },
   { type: 'error', inputs: [{ name: 's', internalType: 'bytes32', type: 'bytes32' }], name: 'ECDSAInvalidSignatureS' },
-  { type: 'error', inputs: [], name: 'PaymentHandler_AmountIsZero' },
   { type: 'error', inputs: [], name: 'PaymentHandler_ExceedDeadline' },
+  { type: 'error', inputs: [], name: 'PaymentHandler_InvalidParams' },
   { type: 'error', inputs: [], name: 'PaymentHandler_NoTransferRequest' },
   { type: 'error', inputs: [], name: 'PaymentHandler_RequestIsLessThanOneDay' },
   { type: 'error', inputs: [], name: 'PaymentHandler_SignerIsNotOperator' },
@@ -64,6 +64,13 @@ export const paymentHandlerABI = [
       { name: 'deadline', internalType: 'uint256', type: 'uint256', indexed: false },
     ],
     name: 'TransferRequestInitiated',
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'MAX_BPS',
+    outputs: [{ name: '', internalType: 'uint16', type: 'uint16' }],
   },
   {
     stateMutability: 'nonpayable',
@@ -84,8 +91,8 @@ export const paymentHandlerABI = [
     type: 'function',
     inputs: [
       { name: '_thbAmount', internalType: 'uint256', type: 'uint256' },
-      { name: '_exchangeRate', internalType: 'uint256', type: 'uint256' },
       { name: '_deadline', internalType: 'uint256', type: 'uint256' },
+      { name: '_exchangeRateBps', internalType: 'uint16', type: 'uint16' },
       { name: '_v', internalType: 'uint8', type: 'uint8' },
       { name: '_r', internalType: 'bytes32', type: 'bytes32' },
       { name: '_s', internalType: 'bytes32', type: 'bytes32' },
@@ -351,6 +358,25 @@ export function usePaymentHandlerRead<
   TSelectData = ReadContractResult<typeof paymentHandlerABI, TFunctionName>,
 >(config: Omit<UseContractReadConfig<typeof paymentHandlerABI, TFunctionName, TSelectData>, 'abi'> = {} as any) {
   return useContractRead({ abi: paymentHandlerABI, ...config } as UseContractReadConfig<
+    typeof paymentHandlerABI,
+    TFunctionName,
+    TSelectData
+  >)
+}
+
+/**
+ * Wraps __{@link useContractRead}__ with `abi` set to __{@link paymentHandlerABI}__ and `functionName` set to `"MAX_BPS"`.
+ */
+export function usePaymentHandlerMaxBps<
+  TFunctionName extends 'MAX_BPS',
+  TSelectData = ReadContractResult<typeof paymentHandlerABI, TFunctionName>,
+>(
+  config: Omit<
+    UseContractReadConfig<typeof paymentHandlerABI, TFunctionName, TSelectData>,
+    'abi' | 'functionName'
+  > = {} as any,
+) {
+  return useContractRead({ abi: paymentHandlerABI, functionName: 'MAX_BPS', ...config } as UseContractReadConfig<
     typeof paymentHandlerABI,
     TFunctionName,
     TSelectData

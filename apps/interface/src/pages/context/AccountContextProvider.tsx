@@ -38,7 +38,7 @@ export const AccountContextProvider = ({
   const {
     tokenBalances,
     tokenAllowances,
-    refetch: refetchTokenAllowances,
+    refetch: refetchTokenStates,
   } = useBundleTokenStates(tokens, chain.id, address)
 
   return (
@@ -50,7 +50,7 @@ export const AccountContextProvider = ({
         // , aaAccountData, aaAccountAddress, isAaNeeded
       }}
     >
-      <ContextAction.Provider value={{ refetchTokenAllowances }}>
+      <ContextAction.Provider value={{ refetchTokenStates }}>
         {children}
       </ContextAction.Provider>
     </ContextState.Provider>

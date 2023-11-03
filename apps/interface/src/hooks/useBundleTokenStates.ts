@@ -68,6 +68,7 @@ export const useBundleTokenStates = (
         }, {} as IContractBalanceMap),
       }
     }, {} as ITokenAllowanceMap)
+    console.log('allowanceMap:', allowanceMap)
 
     return { tokenBalances: balanceMap, tokenAllowances: allowanceMap }
   }, [data])

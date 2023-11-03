@@ -9,5 +9,5 @@ export interface IAccountContextState {
   tokenAllowances: ITokenAllowanceMap | undefined
 }
 export interface IAccountContextAction {
-  refetchTokenAllowances: () => void
+  refetchTokenStates: () => void
 }
