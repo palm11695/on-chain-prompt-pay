@@ -14,19 +14,22 @@ contract PaymentHandler is IPaymentHandler {
 
   struct TransferRequest {
     address sender;
-    uint256 tokenAmount;
+    address operator;
     uint256 initTimestamp;
     uint256 deadline;
+    uint256 tokenAmount;
+    uint256 thbAmount;
+    uint64 promptPayId;
   }
 
   // === Events ===
 
   event TransferRequestInitiated(
     uint256 indexed id,
-    address indexed sender,
+    address indexed operator,
     uint256 thbAmount,
-    uint256 exchangeRate,
-    uint256 deadline
+    uint16 exchangeRateBps,
+    uint64 promptPayId
   );
 
   // === States ===
@@ -34,39 +37,33 @@ contract PaymentHandler is IPaymentHandler {
   ERC20 public immutable token;
   uint16 public constant MAX_BPS = 10000;
 
-  address public operator;
+  // address public operator;
   uint256 public nextTransferRequestId;
   mapping(address sender => uint256 amount) public reservedBalances;
   mapping(uint256 reqId => TransferRequest info) public transferRequests;
   mapping(uint256 reqId => bool isTransfered) public isTransferRequestConfirmed;
 
-  constructor(address _token, address _operator) {
+  constructor(address _token) {
     token = ERC20(_token);
-    operator = _operator;
     nextTransferRequestId = 0;
   }
 
-  modifier onlyOperator() {
-    if (msg.sender != operator) {
-      revert PaymentHandler_Unauthorized();
-    }
-    _;
-  }
-
-  // check sign message is from operator
-  function _verifyMessage(uint16 _exchangeRateBps, uint256 _deadline, uint8 _v, bytes32 _r, bytes32 _s) internal view {
+  function _getMessageSigner(
+    uint16 _exchangeRateBps,
+    uint256 _deadline,
+    uint8 _v,
+    bytes32 _r,
+    bytes32 _s
+  ) internal pure returns (address) {
     bytes32 hash = keccak256(abi.encodePacked(_exchangeRateBps, _deadline));
-    address signer = ECDSA.recover(hash, _v, _r, _s);
-
-    if (signer != operator) {
-      revert PaymentHandler_SignerIsNotOperator();
-    }
+    return ECDSA.recover(hash, _v, _r, _s);
   }
 
   function initTransferRequest(
     uint256 _thbAmount,
     uint256 _deadline,
     uint16 _exchangeRateBps,
+    uint64 _promptPayId,
     uint8 _v,
     bytes32 _r,
     bytes32 _s
@@ -81,9 +78,6 @@ contract PaymentHandler is IPaymentHandler {
       revert PaymentHandler_ExceedDeadline();
     }
 
-    // verify sign message is from operator
-    _verifyMessage(_exchangeRateBps, _deadline, _v, _r, _s);
-
     // calculate balance to lock
     uint256 tokenAmount = (_thbAmount * _exchangeRateBps) / MAX_BPS;
     if (tokenAmount == 0) {
@@ -95,11 +89,20 @@ contract PaymentHandler is IPaymentHandler {
     reservedBalances[msg.sender] += tokenAmount;
 
     // store transfer request info
+    address operator = _getMessageSigner(_exchangeRateBps, _deadline, _v, _r, _s);
     isTransferRequestConfirmed[nextTransferRequestId] = false;
-    transferRequests[nextTransferRequestId] = TransferRequest(msg.sender, tokenAmount, block.timestamp, _deadline);
+    transferRequests[nextTransferRequestId] = TransferRequest(
+      msg.sender,
+      operator,
+      block.timestamp,
+      _deadline,
+      tokenAmount,
+      _thbAmount,
+      _promptPayId
+    );
 
     // emit event with id to notify operator
-    emit TransferRequestInitiated(nextTransferRequestId, msg.sender, _thbAmount, _exchangeRateBps, _deadline);
+    emit TransferRequestInitiated(nextTransferRequestId, operator, _thbAmount, _exchangeRateBps, _promptPayId);
 
     unchecked {
       ++nextTransferRequestId;
@@ -114,11 +117,6 @@ contract PaymentHandler is IPaymentHandler {
 
     TransferRequest memory req = transferRequests[_transferRequestId];
 
-    // revert if msg.sender is not transfer request sender
-    if (msg.sender != req.sender) {
-      revert PaymentHandler_Unauthorized();
-    }
-
     // revert if transfer request is already confirmed
     if (isTransferRequestConfirmed[_transferRequestId]) {
       revert PaymentHandler_TransferRequestAlreadyConfirmed();
@@ -131,10 +129,10 @@ contract PaymentHandler is IPaymentHandler {
     }
 
     // transfer token from this contract to sender
-    token.safeTransfer(msg.sender, req.tokenAmount);
+    token.safeTransfer(req.sender, req.tokenAmount);
 
     // decrease balance of request sender
-    reservedBalances[msg.sender] -= req.tokenAmount;
+    reservedBalances[req.sender] -= req.tokenAmount;
 
     // set transfer request to confirmed
     isTransferRequestConfirmed[_transferRequestId] = true;
@@ -143,18 +141,22 @@ contract PaymentHandler is IPaymentHandler {
     delete transferRequests[_transferRequestId];
   }
 
-  function confirmTransferRequest(uint256 _transferRequestId) external override onlyOperator {
+  function confirmTransferRequest(uint256 _transferRequestId) external override {
     // revert if no transfer request
     if (nextTransferRequestId == 0 || _transferRequestId >= nextTransferRequestId) {
       revert PaymentHandler_NoTransferRequest();
     }
 
-    // get transfer request info
-    TransferRequest memory req = transferRequests[_transferRequestId];
-
     // revert if transfer request is already confirmed
     if (isTransferRequestConfirmed[_transferRequestId]) {
       revert PaymentHandler_TransferRequestAlreadyConfirmed();
+    }
+
+    TransferRequest memory req = transferRequests[_transferRequestId];
+
+    // revert if msg.sender is not operator
+    if (msg.sender != req.operator) {
+      revert PaymentHandler_Unauthorized();
     }
 
     // revert if deadline is passed
@@ -162,8 +164,10 @@ contract PaymentHandler is IPaymentHandler {
       revert PaymentHandler_ExceedDeadline();
     }
 
+    // TODO: implement proof
+
     // transfer token from this contract to operator
-    token.safeTransfer(operator, req.tokenAmount);
+    token.safeTransfer(msg.sender, req.tokenAmount);
 
     // decrease balance of request sender
     reservedBalances[req.sender] -= req.tokenAmount;
