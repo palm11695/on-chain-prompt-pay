@@ -6,6 +6,7 @@ import TransferPage from './pages/Transfer/TransferPage'
 import TopUpPortal from './pages/TopUpPortal/TopUpPortal'
 import { ConnectWalletPage } from './components/OnBoarding/ConnectWalletPage'
 import { QrCodeReader } from './pages/Reader/QrCodeReader'
+import LoadingPage from './pages/Loading/Loading'
 
 const router = createBrowserRouter([
   {
@@ -35,6 +36,10 @@ const router = createBrowserRouter([
   {
     path: '/qr-reader',
     element: <QrCodeReader />,
+  },
+  {
+    path: '/loading',
+    element: <LoadingPage />,
   },
 ])
 

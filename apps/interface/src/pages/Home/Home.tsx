@@ -113,7 +113,10 @@ export const Home = () => {
 
       <div className="fixed bottom-0 left-0 flex w-full flex-col gap-y-1.5 px-4 pb-4">
         <Button onClick={() => navigate('/qr-reader')}>Pay via QR</Button>
-        <Button onClick={() => navigate('/topup-portal')} variant="secondary">
+        <Button
+          onClick={() => navigate('/loading?goTo=topup-portal')}
+          variant="secondary"
+        >
           Topup
         </Button>
       </div>

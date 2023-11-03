@@ -102,7 +102,7 @@ const TransferPage = () => {
 
       <div className="fixed bottom-0 left-0 flex w-full flex-col gap-y-2 px-4 pb-4">
         <Button onClick={() => setIsReview(true)}>Confirm and Pay</Button>
-        <Button variant="danger" onClick={() => navigate('/')}>
+        <Button variant="danger" onClick={() => navigate('/loading')}>
           Cancel
         </Button>
       </div>

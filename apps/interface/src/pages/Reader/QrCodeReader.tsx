@@ -34,7 +34,7 @@ export const QrCodeReader = () => {
       const simplifiedAmount = simplifyAmount(amountMatch?.[0])
 
       navigate(
-        `/transfer?type=${spenderType}&transferTo=${simplifiedAddress}&amount=${simplifiedAmount}`,
+        `/loading?goTo=transfer&type=${spenderType}&transferTo=${simplifiedAddress}&amount=${simplifiedAmount}`,
       )
     }
   }, [data])
