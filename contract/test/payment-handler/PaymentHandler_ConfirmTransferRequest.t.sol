@@ -16,7 +16,7 @@ contract PaymentHandlerConfirmTransferRequestTest is PaymentHandlerBaseTest {
     vm.prank(operator);
     paymentHandler.confirmTransferRequest(transferRequestId);
 
-    assertEq(usdc.balanceOf(operator), 200);
+    assertEq(usdc.balanceOf(operator), 28);
     assertEq(usdc.balanceOf(address(paymentHandler)), 0);
 
     assertEq(paymentHandler.reservedBalances(ALICE), 0);

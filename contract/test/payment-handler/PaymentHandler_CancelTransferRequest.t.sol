@@ -36,8 +36,8 @@ contract PaymentHandlerCancelTransferRequestTest is PaymentHandlerBaseTest {
     vm.expectRevert(IPaymentHandler.PaymentHandler_NoTransferRequest.selector);
     paymentHandler.cancelTransferRequest(1);
 
-    assertEq(usdc.balanceOf(address(paymentHandler)), 200);
-    assertEq(paymentHandler.reservedBalances(ALICE), 200);
+    assertEq(usdc.balanceOf(address(paymentHandler)), 28);
+    assertEq(paymentHandler.reservedBalances(ALICE), 28);
   }
 
   function testRevert_WhenCancelTransferRequest_WithOtherSender() public {
@@ -49,8 +49,8 @@ contract PaymentHandlerCancelTransferRequestTest is PaymentHandlerBaseTest {
     vm.expectRevert(IPaymentHandler.PaymentHandler_Unauthorized.selector);
     paymentHandler.cancelTransferRequest(transferRequestId);
 
-    assertEq(usdc.balanceOf(address(paymentHandler)), 200);
-    assertEq(paymentHandler.reservedBalances(ALICE), 200);
+    assertEq(usdc.balanceOf(address(paymentHandler)), 28);
+    assertEq(paymentHandler.reservedBalances(ALICE), 28);
   }
 
   function testRevert_WhenCancelTransferRequest_AfterConfirm() public {
@@ -67,7 +67,7 @@ contract PaymentHandlerCancelTransferRequestTest is PaymentHandlerBaseTest {
     vm.expectRevert(IPaymentHandler.PaymentHandler_TransferRequestAlreadyConfirmed.selector);
     paymentHandler.cancelTransferRequest(transferRequestId);
 
-    assertEq(usdc.balanceOf(address(operator)), 200);
+    assertEq(usdc.balanceOf(address(operator)), 28);
     assertEq(usdc.balanceOf(address(paymentHandler)), 0);
     assertEq(usdc.balanceOf(ALICE), aliceBalanceAfterInit);
   }
