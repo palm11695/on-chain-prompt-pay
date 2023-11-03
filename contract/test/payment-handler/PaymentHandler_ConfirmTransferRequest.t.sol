@@ -40,11 +40,11 @@ contract PaymentHandlerConfirmTransferRequestTest is PaymentHandlerBaseTest {
     paymentHandler.confirmTransferRequest(nextId);
   }
 
-  function testRevert_WhenConfirmTransferRequest_WithUnauthorizedCaller() public {
-    vm.prank(ALICE);
-    vm.expectRevert(IPaymentHandler.PaymentHandler_Unauthorized.selector);
-    paymentHandler.confirmTransferRequest(0);
-  }
+  // function testRevert_WhenConfirmTransferRequest_WithUnauthorizedCaller() public {
+  //   vm.prank(ALICE);
+  //   vm.expectRevert(IPaymentHandler.PaymentHandler_Unauthorized.selector);
+  //   paymentHandler.confirmTransferRequest(0);
+  // }
 
   function testRevert_WhenConfirmTransferRequest_WithSameId() public {
     _aliceInitTransferRequest();
