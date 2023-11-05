@@ -2,9 +2,9 @@
 pragma solidity 0.8.21;
 
 import { Script, console2 } from "forge-std/Script.sol";
-import { PaymentHandler } from "../src/PaymentHandler.sol";
+import { KbankPaymentHandler } from "../src/KbankPaymentHandler.sol";
 import { DKIMRegistry } from "../src/DKIMRegistry.sol";
-import { ZKVerifier } from "../src/ZKVerifier.sol";
+import { ZKVerifier } from "../src/KbankZKVerifier.sol";
 
 contract DeploymentScript is Script {
   uint256 internal deployerPrivateKey = vm.envUint("DEPLOYER_PRIVATE_KEY");
@@ -25,12 +25,12 @@ contract DeploymentScript is Script {
     DKIMRegistry dkimRegistry = new DKIMRegistry(operator);
 
     // deploy payment handler
-    console2.log("Deploying PaymentHandler...");
-    PaymentHandler paymentHandler = new PaymentHandler(usdc, address(zkVerifier), address(dkimRegistry));
+    console2.log("Deploying KbankPaymentHandler...");
+    KbankPaymentHandler paymentHandler = new KbankPaymentHandler(usdc, address(zkVerifier), address(dkimRegistry));
 
     vm.stopBroadcast();
 
     console2.log("DKIMRegistry deployed at: %s", vm.toString(address(dkimRegistry)));
-    console2.log("PaymentHandler deployed at: %s", vm.toString(address(paymentHandler)));
+    console2.log("KbankPaymentHandler deployed at: %s", vm.toString(address(paymentHandler)));
   }
 }
