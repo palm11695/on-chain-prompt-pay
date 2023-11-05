@@ -2,7 +2,8 @@
   "name": "@twitter-verifier/circuits",
   "version": "2.1.0",
   "scripts": {
-    "test": "NODE_OPTIONS=--max_old_space_size=16384 vitest run kbank"
+    "test:kbank": "NODE_OPTIONS=--max_old_space_size=16384 vitest run kbank",
+    "test:scb": "NODE_OPTIONS=--max_old_space_size=16384 vitest run scb"
   },
   "dependencies": {
     "@zk-email/circuits": "^3.2.0",
