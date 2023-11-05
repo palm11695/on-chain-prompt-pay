@@ -20,7 +20,6 @@ const LoadingPage = ({
 
   const { search } = useLocation()
   useEffect(() => {
-    console.log('search:', search)
     const goTo = new URLSearchParams(search).get('goTo')
     const delay = new URLSearchParams(search).get('delay')
     const params = new URLSearchParams(search)
