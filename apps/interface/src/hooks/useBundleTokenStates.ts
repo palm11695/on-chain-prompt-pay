@@ -46,7 +46,7 @@ export const useBundleTokenStates = (
   })
 
   const tokenStates = useMemo(() => {
-    if (!data || data.length === 0)
+    if (!data || data.length === 0 || data[0].result === undefined)
       return {
         tokenBalances: undefined,
         tokenAllowances: undefined,

@@ -11,7 +11,7 @@ export const middleEllipsis = (text: string): string => {
 export const simplifyPromptPayAccount = (
   accountType: string,
   value?: string,
-): string => {
+): string | undefined => {
   const parts = []
   if (value) {
     if (accountType === ReceiverType.ID_Card.toString()) {
@@ -40,17 +40,17 @@ export const simplifyPromptPayAccount = (
     return parts.join('-')
   }
 
-  return ''
+  return undefined
 }
 
-export const simplifyAmount = (amount?: string) => {
+export const simplifyAmount = (amount?: string): string | undefined => {
   if (amount) {
     // amount sent here will be '54{0x-10}{0-9999999}.xx
     const simplifiedAmount = amount.slice(4)
     return simplifiedAmount
   }
 
-  return '0.00'
+  return undefined
 }
 
 export const etherDecimal = (decimal: number) => {
@@ -65,4 +65,27 @@ export const denormalizeToE18Decimal = (amount: bigint, decimal: number) => {
 export const normalizefromE18Decimal = (amount: bigint, decimal: number) => {
   const exp = 18 - decimal
   return amount / BigInt(etherDecimal(exp))
+}
+
+export enum QrErrorLabel {
+  PromptPayIDNotFound = 'PromptPay ID Not Found.',
+  AmountNotFound = 'Amount Not Found.',
+  CantProcessQr = 'Cant Process QR Code.',
+  Unknown = 'Something went wrong.',
+}
+
+export const getQrErrorLabel = (
+  receiver: string | undefined,
+  amount: string | undefined,
+  isError: boolean | undefined,
+) => {
+  if (isError) return buildQrErrorMessage(QrErrorLabel.CantProcessQr)
+  if (!receiver) return buildQrErrorMessage(QrErrorLabel.PromptPayIDNotFound)
+  if (!amount) return buildQrErrorMessage(QrErrorLabel.AmountNotFound)
+
+  return buildQrErrorMessage(QrErrorLabel.Unknown)
+}
+
+const buildQrErrorMessage = (label: QrErrorLabel): string => {
+  return label + ' ' + 'Please try again'
 }
