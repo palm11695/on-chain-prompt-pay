@@ -17,7 +17,7 @@ contract PaymentHandlerInitTransferRequestTest is PaymentHandlerBaseTest {
 
     vm.startPrank(ALICE);
     usdc.approve(address(paymentHandler), 28);
-    paymentHandler.initTransferRequest(thbAmount, deadline, exchangeRate, 1, v, r, s);
+    paymentHandler.initTransferRequest(thbAmount, deadline, exchangeRate, "1", v, r, s);
     vm.stopPrank();
 
     assertEq(paymentHandler.reservedBalances(ALICE), 28);
@@ -37,7 +37,7 @@ contract PaymentHandlerInitTransferRequestTest is PaymentHandlerBaseTest {
 
     vm.startPrank(ALICE);
     usdc.approve(address(paymentHandler), 280);
-    paymentHandler.initTransferRequest(thbAmount, deadline, firstExchangeRate, 1, v, r, s);
+    paymentHandler.initTransferRequest(thbAmount, deadline, firstExchangeRate, "1", v, r, s);
     vm.stopPrank();
 
     assertEq(paymentHandler.reservedBalances(ALICE), 280);
@@ -49,7 +49,7 @@ contract PaymentHandlerInitTransferRequestTest is PaymentHandlerBaseTest {
 
     vm.startPrank(ALICE);
     usdc.approve(address(paymentHandler), 300);
-    paymentHandler.initTransferRequest(thbAmount, deadline, secondExchangeRate, 888, v, r, s);
+    paymentHandler.initTransferRequest(thbAmount, deadline, secondExchangeRate, "888", v, r, s);
     vm.stopPrank();
 
     assertEq(paymentHandler.reservedBalances(ALICE), 580);
@@ -59,29 +59,29 @@ contract PaymentHandlerInitTransferRequestTest is PaymentHandlerBaseTest {
   function testRevert_WhenInitTransferRequest_WithInvalidParams() public {
     // should revert when thbAmount is zero
     vm.expectRevert(IPaymentHandler.PaymentHandler_InvalidParams.selector);
-    paymentHandler.initTransferRequest(0, block.timestamp, 1, 888, uint8(1), bytes32("0x"), bytes32("0x"));
+    paymentHandler.initTransferRequest(0, block.timestamp, 1, "888", uint8(1), bytes32("0x"), bytes32("0x"));
 
     // should revert when exchange rate is zero
     vm.expectRevert(IPaymentHandler.PaymentHandler_InvalidParams.selector);
-    paymentHandler.initTransferRequest(1, block.timestamp, 0, 888, uint8(1), bytes32("0x"), bytes32("0x"));
+    paymentHandler.initTransferRequest(1, block.timestamp, 0, "888", uint8(1), bytes32("0x"), bytes32("0x"));
 
     // should revert when thbAmount and exchange rate is zero
     vm.expectRevert(IPaymentHandler.PaymentHandler_InvalidParams.selector);
-    paymentHandler.initTransferRequest(0, block.timestamp, 0, 888, uint8(1), bytes32("0x"), bytes32("0x"));
+    paymentHandler.initTransferRequest(0, block.timestamp, 0, "888", uint8(1), bytes32("0x"), bytes32("0x"));
 
     // should revert when exchange rate is greater than MAX_BPS
     vm.expectRevert(IPaymentHandler.PaymentHandler_InvalidParams.selector);
-    paymentHandler.initTransferRequest(0, block.timestamp, 10001, 888, uint8(1), bytes32("0x"), bytes32("0x"));
+    paymentHandler.initTransferRequest(0, block.timestamp, 10001, "888", uint8(1), bytes32("0x"), bytes32("0x"));
 
     // should revert when thbAmount and exchange rate is too low
     (uint8 v, bytes32 r, bytes32 s) = _operatorSign(1, block.timestamp);
     vm.expectRevert(IPaymentHandler.PaymentHandler_InvalidParams.selector);
-    paymentHandler.initTransferRequest(1, block.timestamp, 1, 888, v, r, s);
+    paymentHandler.initTransferRequest(1, block.timestamp, 1, "888", v, r, s);
   }
 
   function testRevert_WhenInitTransferRequest_AndExchangeRateIsStale() public {
     vm.prank(ALICE);
     vm.expectRevert(IPaymentHandler.PaymentHandler_StaleExchangeRate.selector);
-    paymentHandler.initTransferRequest(1, block.timestamp - 1, 1, 888, uint8(1), bytes32("0x"), bytes32("0x"));
+    paymentHandler.initTransferRequest(1, block.timestamp - 1, 1, "888", uint8(1), bytes32("0x"), bytes32("0x"));
   }
 }

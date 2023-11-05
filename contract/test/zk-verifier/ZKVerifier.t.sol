@@ -5,7 +5,7 @@ import { ZKVerifier } from "../../src/ZKVerifier.sol";
 
 import "forge-std/Test.sol";
 
-import "../utils/StringUtils.sol";
+import "../../src/utils/StringUtils.sol";
 
 contract ZKVerifierTest is Test {
   ZKVerifier internal verifier;

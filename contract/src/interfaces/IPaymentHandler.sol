@@ -16,7 +16,7 @@ interface IPaymentHandler {
     uint256 _thbAmount,
     uint256 _deadline,
     uint16 _exchangeRateBps,
-    uint64 _promptPayId,
+    string calldata _promptPayId,
     uint8 _v,
     bytes32 _r,
     bytes32 _s
@@ -24,9 +24,5 @@ interface IPaymentHandler {
 
   function cancelTransferRequest(uint256 _transferRequestId) external;
 
-  function confirmTransferRequest(
-    uint256 _transferRequestId,
-    uint256[8] memory _proof,
-    uint256[3] memory _signal
-  ) external;
+  function confirmTransferRequest(uint256 _transferRequestId, uint256[8] memory _proof) external;
 }

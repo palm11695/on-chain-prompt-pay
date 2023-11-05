@@ -11,6 +11,9 @@ import { ZKVerifier } from "./ZKVerifier.sol";
 import { IPaymentHandler } from "./interfaces/IPaymentHandler.sol";
 import { IDKIMRegistry } from "./interfaces/IDKIMRegistry.sol";
 
+// utils
+import { StringUtils } from "./utils/StringUtils.sol";
+
 contract PaymentHandler is IPaymentHandler {
   using SafeTransferLib for ERC20;
 
@@ -20,7 +23,7 @@ contract PaymentHandler is IPaymentHandler {
     uint256 initTimestamp;
     uint256 tokenAmount;
     uint256 thbAmount;
-    uint64 promptPayId;
+    string promptPayId;
   }
 
   // === Events ===
@@ -30,7 +33,7 @@ contract PaymentHandler is IPaymentHandler {
     address indexed operator,
     uint256 thbAmount,
     uint16 exchangeRateBps,
-    uint64 promptPayId
+    string promptPayId
   );
 
   // === States ===
@@ -86,7 +89,7 @@ contract PaymentHandler is IPaymentHandler {
     uint256 _thbAmount,
     uint256 _rateExpiry,
     uint16 _exchangeRateBps,
-    uint64 _promptPayId,
+    string calldata _promptPayId,
     uint8 _v,
     bytes32 _r,
     bytes32 _s
@@ -163,11 +166,7 @@ contract PaymentHandler is IPaymentHandler {
     delete transferRequests[_transferRequestId];
   }
 
-  function confirmTransferRequest(
-    uint256 _transferRequestId,
-    uint256[8] memory _proof,
-    uint256[3] memory _signal
-  ) external override {
+  function confirmTransferRequest(uint256 _transferRequestId, uint256[8] memory _proof) external override {
     // revert if no transfer request
     if (nextTransferRequestId == 0 || _transferRequestId >= nextTransferRequestId) {
       revert PaymentHandler_NoTransferRequest();
@@ -185,8 +184,11 @@ contract PaymentHandler is IPaymentHandler {
       revert PaymentHandler_Unauthorized();
     }
 
-    // verify DKIM public key hash between on-chain and circuit
-    _verifyDKIMPublicKeyHash(_signal[publicKeyHashIndex]);
+    // Construct public signals from stored data
+    uint256[3] memory _publicSignals;
+    _publicSignals[0] = uint256(dkimRegistry.getDKIMPublicKeyHash(BANK_DOMAIN));
+    _publicSignals[1] = StringUtils.convertStringToPackedBytes(req.promptPayId, 31)[0];
+    _publicSignals[2] = uint256(uint160(req.operator));
 
     // verify RSA and proof
     if (
@@ -194,7 +196,7 @@ contract PaymentHandler is IPaymentHandler {
         [_proof[0], _proof[1]],
         [[_proof[2], _proof[3]], [_proof[4], _proof[5]]],
         [_proof[6], _proof[7]],
-        _signal
+        _publicSignals
       )
     ) {
       revert PaymentHandler_InvalidProof();
