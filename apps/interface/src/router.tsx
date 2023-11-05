@@ -41,6 +41,10 @@ const router = createBrowserRouter([
     path: '/loading',
     element: <LoadingPage />,
   },
+  {
+    path: '*',
+    element: <Home />,
+  },
 ])
 
 export default router
