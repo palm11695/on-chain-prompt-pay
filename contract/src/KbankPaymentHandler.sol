@@ -5,7 +5,7 @@ pragma solidity 0.8.21;
 import { ERC20 } from "@solmate/tokens/ERC20.sol";
 import { SafeTransferLib } from "@solmate/utils/SafeTransferLib.sol";
 import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import { ZKVerifier } from "./ZKVerifier.sol";
+import { ZKVerifier } from "./KbankZKVerifier.sol";
 
 // interfaces
 import { IPaymentHandler } from "./interfaces/IPaymentHandler.sol";
@@ -14,7 +14,7 @@ import { IDKIMRegistry } from "./interfaces/IDKIMRegistry.sol";
 // utils
 import { StringUtils } from "./utils/StringUtils.sol";
 
-contract PaymentHandler is IPaymentHandler {
+contract KbankPaymentHandler is IPaymentHandler {
   using SafeTransferLib for ERC20;
 
   struct TransferRequest {

@@ -3,9 +3,9 @@ pragma solidity 0.8.21;
 
 import { BaseTest } from "../BaseTest.t.sol";
 import { MockERC20 } from "../mocks/MockERC20.sol";
-import { PaymentHandler } from "../../src/PaymentHandler.sol";
+import { PaymentHandler } from "../../src/KbankPaymentHandler.sol";
 import { DKIMRegistry } from "../../src/DKIMRegistry.sol";
-import { ZKVerifier } from "../../src/ZKVerifier.sol";
+import { ZKVerifier } from "../../src/KbankZKVerifier.sol";
 
 import { IPaymentHandler } from "../../src/interfaces/IPaymentHandler.sol";
 
