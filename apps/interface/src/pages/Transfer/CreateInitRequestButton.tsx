@@ -19,7 +19,7 @@ interface ICreateInitTransferRequestCalldata {
   transferTo?: string
 }
 
-const defaultButtonValidation = {
+export const defaultValidationButton = {
   label: 'Confirm and Pay',
   disabled: false,
   action: () => undefined,
@@ -78,18 +78,18 @@ export const CreateInitTransferRequestButton = ({
   // build label, disable, action
   const { label, disabled, action } = useMemo(() => {
     if (isApprovalNeeded === undefined)
-      return { ...defaultButtonValidation, disabled: true }
+      return { ...defaultValidationButton, disabled: true }
 
     // Approve
     if (isApprovalNeeded)
       return {
-        ...defaultButtonValidation,
+        ...defaultValidationButton,
         label: 'Approve',
         action: approveToken,
       }
     if (isApproving)
       return {
-        ...defaultButtonValidation,
+        ...defaultValidationButton,
         label: 'Approving',
         disabled: true,
       }
@@ -98,13 +98,13 @@ export const CreateInitTransferRequestButton = ({
     if (!verifiedMessage) {
       if (isSigning)
         return {
-          ...defaultButtonValidation,
+          ...defaultValidationButton,
           label: 'Signing...',
           disabled: true,
         }
 
       return {
-        ...defaultButtonValidation,
+        ...defaultValidationButton,
         label: 'Sign Message',
         action: handleSignExchangeRate,
       }
@@ -112,13 +112,13 @@ export const CreateInitTransferRequestButton = ({
 
     if (isCreating) {
       return {
-        ...defaultButtonValidation,
+        ...defaultValidationButton,
         label: 'Creating request...',
         disabled: true,
       }
     }
 
-    return { ...defaultButtonValidation, action: createInitTransferRequest }
+    return { ...defaultValidationButton, action: createInitTransferRequest }
   }, [
     isApprovalNeeded,
     verifiedMessage,
