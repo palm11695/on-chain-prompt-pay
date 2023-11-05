@@ -5,9 +5,7 @@ export enum ContractKey {
 }
 
 export const contracts: IContractAddressMap = {
-  // Big deployed
-  [ContractKey.PaymentHandler]: '0x1Ce1a9F7F440815502c0F6441b7a0b0F461dE1C5',
-  // [ContractKey.PaymentHandler]: '0x9adc7af330889d5D072F271aEbb9247aa08d083c',
+  [ContractKey.PaymentHandler]: '0xC2c42EDB20E827049c17235cBc53C9eE5160030a',
 }
 
 export const ContractKeys = (

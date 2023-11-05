@@ -17,7 +17,7 @@ import { tokenPrices } from '../../configs/prices'
 import { USD_THB } from '../../utils/constants'
 
 interface ICreateInitTransferRequestCalldata {
-  amount: bigint
+  thbAmount: bigint
   asset: ITokenProfile
   promptPayId: string
 }
@@ -29,26 +29,31 @@ export const defaultValidationButton = {
 }
 
 export const CreateInitTransferRequestButton = ({
-  amount,
+  thbAmount,
   asset,
   promptPayId,
 }: ICreateInitTransferRequestCalldata) => {
   // contexts
-  const { tokenAllowances, account } = useAccountContextState()
+  const { tokenAllowances, account, tokenBalances } = useAccountContextState()
   const { refetchTokenStates } = useAccountContextActions()
   const navigate = useNavigate()
   // hooks
   const exchangeRates = useExchangeRates()
+
+  const tokenTransferAmount = useMemo(() => {
+    return (
+      (thbAmount * BigInt(1e6)) /
+      (parseEther((tokenPrices[asset.displaySymbol] * USD_THB).toString()) /
+        BigInt(1e12))
+    )
+  }, [thbAmount])
 
   // use prepare write approve
   const { write: approveToken, isLoading: isApproving } = usePrepareApprove({
     calldata: {
       asset,
       spender: contracts[ContractKey.PaymentHandler] as Address,
-      amount:
-        (amount * BigInt(1e6)) /
-        (parseEther((tokenPrices[asset.displaySymbol] * USD_THB).toString()) /
-          BigInt(1e12)),
+      amount: tokenTransferAmount,
     },
     onSuccess: () => refetchTokenStates(),
   })
@@ -63,7 +68,7 @@ export const CreateInitTransferRequestButton = ({
   const { write: createInitTransferRequest, isLoading: isCreating } =
     usePrepareCreateInitTransferRequest({
       calldata: {
-        thbAmount: amount,
+        thbAmount: thbAmount,
         deadline: deadline,
         exchangeRate: exchangeRates[asset.displaySymbol],
         promptPayId: desimplifyPromptPayAccount(promptPayId),
@@ -71,7 +76,7 @@ export const CreateInitTransferRequestButton = ({
       },
       onSuccess: () => {
         refetchTokenStates()
-        setTimeout(() => navigate('/loading'))
+        setTimeout(() => navigate('/success'))
       },
     })
 
@@ -80,16 +85,27 @@ export const CreateInitTransferRequestButton = ({
 
     return (
       tokenAllowances[asset.displaySymbol][ContractKey.PaymentHandler] <
-      (amount * BigInt(1e6)) /
-        (parseEther((tokenPrices[asset.displaySymbol] * USD_THB).toString()) /
-          BigInt(1e12))
+      tokenTransferAmount
     )
-  }, [amount, tokenAllowances])
+  }, [tokenTransferAmount, tokenAllowances])
 
   // build label, disable, action
   const { label, disabled, action } = useMemo(() => {
-    if (isApprovalNeeded === undefined)
+    if (isApprovalNeeded === undefined || !tokenBalances)
       return { ...defaultValidationButton, disabled: true }
+
+    if (Number(thbAmount) <= 0)
+      return {
+        ...defaultValidationButton,
+        disabled: true,
+      }
+
+    if (tokenTransferAmount > tokenBalances[asset.displaySymbol])
+      return {
+        ...defaultValidationButton,
+        label: 'Insufficient Balance',
+        disabled: true,
+      }
 
     // Approve
     if (isApprovalNeeded) {
@@ -133,6 +149,9 @@ export const CreateInitTransferRequestButton = ({
 
     return { ...defaultValidationButton, action: createInitTransferRequest }
   }, [
+    thbAmount,
+    tokenTransferAmount,
+    tokenBalances,
     isApprovalNeeded,
     verifiedMessage,
     isApproving,

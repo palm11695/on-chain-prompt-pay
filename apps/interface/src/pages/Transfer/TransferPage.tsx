@@ -2,7 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import Button from '../../components/Button'
 import Container from '../../components/Container'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { etherDecimal, normalizefromE18Decimal } from '../../utils/utils'
+import { normalizefromE18Decimal } from '../../utils/utils'
 import { useAccountContextState } from '../context/AccountContextProvider'
 import LoadingPage from '../Loading/Loading'
 import { AccountSection } from '../../components/AccountSection'
@@ -10,17 +10,13 @@ import { ITokenProfile, usdc } from '../../configs/tokens'
 import { TransferInput } from '../../components/TransferInput'
 import { ReceiverType } from '../Reader/QrCodeReader'
 import { parseEther, zeroAddress } from 'viem'
-import {
-  CreateInitTransferRequestButton,
-  defaultValidationButton,
-} from './CreateInitRequestButton'
+import { CreateInitTransferRequestButton } from './CreateInitRequestButton'
 import { ReviewTxSummary } from '../../components/ReviewTxSummary'
-import { tokenPrices } from '../../configs/prices'
-import { USD_THB } from '../../utils/constants'
 
 export enum ActionStatus {
   Transfer = 'Transfer',
   Review = 'Review',
+  Success = 'Success',
 }
 
 const TransferPage = () => {
@@ -60,9 +56,7 @@ const TransferPage = () => {
   }, [status])
 
   const loadingLabel = useMemo(() => {
-    return status === ActionStatus.Transfer
-      ? 'Loading...'
-      : 'Fetching best quote...'
+    return status === ActionStatus.Transfer ? 'Loading...' : 'Waiting for tx...'
   }, [status])
 
   return (
@@ -83,7 +77,7 @@ const TransferPage = () => {
           onChange={setAmountIn}
           onClick={() => {
             setIsLoading(true)
-            setStatus(ActionStatus.Review)
+            setStatus(ActionStatus.Success)
           }}
           onCancel={handleCancel}
         />
@@ -195,12 +189,12 @@ const ReviewTxContent = ({
 }
 
 const ValidationButton = ({
-  status,
+  // status,
   promptPayId,
   amountIn,
   token,
-  balance,
-  onClick,
+  // balance,
+  // onClick,
   onCancel,
 }: {
   status: ActionStatus
@@ -211,45 +205,27 @@ const ValidationButton = ({
   onClick?: React.Dispatch<React.SetStateAction<ActionStatus>>
   onCancel: () => void
 }) => {
-  const { label, disabled } = useMemo(() => {
-    if (Number(amountIn) <= 0)
-      return {
-        ...defaultValidationButton,
-        disabled: true,
-      }
-
-    if (
-      Number(amountIn) / (tokenPrices[token.displaySymbol] * USD_THB) >
-      Number(balance) / etherDecimal(token.decimal)
-    )
-      return {
-        ...defaultValidationButton,
-        label: 'Insufficient Balance',
-        disabled: true,
-      }
-
-    return {
-      label: 'Confirm and Pay',
-      disabled: false,
-    }
-  }, [amountIn, balance])
-
   return (
     <div className="fixed bottom-0 left-0 flex w-full flex-col gap-y-2 px-4 pb-4">
-      {status === ActionStatus.Review ? (
+      {/* {status === ActionStatus.Review ? (
         <CreateInitTransferRequestButton
           promptPayId={promptPayId}
           amount={normalizefromE18Decimal(parseEther(amountIn), token.decimal)}
           asset={token}
         />
-      ) : (
-        <Button
+        ) : (
+          <Button
           onClick={() => onClick?.(ActionStatus.Review)}
           disabled={disabled}
-        >
+          >
           {label}
-        </Button>
-      )}
+          </Button>
+        )} */}
+      <CreateInitTransferRequestButton
+        promptPayId={promptPayId}
+        thbAmount={normalizefromE18Decimal(parseEther(amountIn), token.decimal)}
+        asset={token}
+      />
       <Button variant="danger" onClick={onCancel}>
         Cancel
       </Button>
