@@ -14,7 +14,7 @@ contract DeploymentScript is Script {
 
     // config
     address usdc = vm.parseAddress("0x38934bDf2462768388829194fD40a43eD9916B4C");
-    address operator = vm.parseAddress("0x09FC1B9B288647FF0b5b4668C74e51F8bEA50C67");
+    address owner = vm.parseAddress("0x09FC1B9B288647FF0b5b4668C74e51F8bEA50C67");
 
     // deploy zk verifier
     console2.log("Deploying SCBEWalletZKVerifier...");
@@ -22,7 +22,7 @@ contract DeploymentScript is Script {
 
     // deploy dkim registry
     console2.log("Deploying DKIMRegistry...");
-    DKIMRegistry dkimRegistry = new DKIMRegistry(operator);
+    DKIMRegistry dkimRegistry = new DKIMRegistry(owner);
 
     // deploy payment handler
     console2.log("Deploying SCBEWalletPaymentHandler...");
