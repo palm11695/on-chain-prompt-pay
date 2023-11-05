@@ -3,7 +3,7 @@ pragma solidity 0.8.21;
 
 import { ERC20 } from "@solmate/tokens/ERC20.sol";
 import { Test, console2 } from "forge-std/Test.sol";
-import { VmSafe } from "forge-std/VM.sol";
+import { Vm } from "forge-std/VM.sol";
 
 import { MockERC20 } from "./mocks/MockERC20.sol";
 

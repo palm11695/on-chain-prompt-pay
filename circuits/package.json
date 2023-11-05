@@ -1,0 +1,22 @@
+{
+  "name": "@twitter-verifier/circuits",
+  "version": "2.1.0",
+  "scripts": {
+    "test": "NODE_OPTIONS=--max_old_space_size=16384 vitest run kbank"
+  },
+  "dependencies": {
+    "@zk-email/circuits": "^3.2.0",
+    "@zk-email/helpers": "2.0.0",
+    "@zk-email/zk-regex-circom": "^1.1.1",
+    "big-integer": "^1.6.51",
+    "snarkjs": "github:vb7401/snarkjs#24981febe8826b6ab76ae4d76cf7f9142919d2b8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.10",
+    "circom_tester": "^0.0.19",
+    "circomlib": "^2.0.5",
+    "circomlibjs": "^0.1.2",
+    "ffjavascript": "^0.2.59",
+    "vitest": "^0.34.6"
+  }
+}

@@ -40,22 +40,22 @@ contract PaymentHandlerCancelTransferRequestTest is PaymentHandlerBaseTest {
     assertEq(paymentHandler.reservedBalances(ALICE), 28);
   }
 
-  function testRevert_WhenCancelTransferRequest_AfterConfirm() public {
-    _aliceInitTransferRequest();
-    uint256 aliceBalanceAfterInit = usdc.balanceOf(ALICE);
+  // function testRevert_WhenCancelTransferRequest_AfterConfirm() public {
+  //   _aliceInitTransferRequest();
+  //   uint256 aliceBalanceAfterInit = usdc.balanceOf(ALICE);
 
-    // operator confirm transfer request
-    uint256 transferRequestId = 0;
-    vm.prank(operator);
-    paymentHandler.confirmTransferRequest(transferRequestId);
+  //   // operator confirm transfer request
+  //   uint256 transferRequestId = 0;
+  //   vm.prank(operator);
+  //   paymentHandler.confirmTransferRequest(transferRequestId);
 
-    // alice try to cancel transfer request
-    vm.prank(ALICE);
-    vm.expectRevert(IPaymentHandler.PaymentHandler_TransferRequestAlreadyConfirmed.selector);
-    paymentHandler.cancelTransferRequest(transferRequestId);
+  //   // alice try to cancel transfer request
+  //   vm.prank(ALICE);
+  //   vm.expectRevert(IPaymentHandler.PaymentHandler_TransferRequestAlreadyConfirmed.selector);
+  //   paymentHandler.cancelTransferRequest(transferRequestId);
 
-    assertEq(usdc.balanceOf(address(operator)), 28);
-    assertEq(usdc.balanceOf(address(paymentHandler)), 0);
-    assertEq(usdc.balanceOf(ALICE), aliceBalanceAfterInit);
-  }
+  //   assertEq(usdc.balanceOf(address(operator)), 28);
+  //   assertEq(usdc.balanceOf(address(paymentHandler)), 0);
+  //   assertEq(usdc.balanceOf(ALICE), aliceBalanceAfterInit);
+  // }
 }

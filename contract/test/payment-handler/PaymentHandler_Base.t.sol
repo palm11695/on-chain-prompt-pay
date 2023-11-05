@@ -4,6 +4,8 @@ pragma solidity 0.8.21;
 import { BaseTest } from "../BaseTest.t.sol";
 import { MockERC20 } from "../mocks/MockERC20.sol";
 import { PaymentHandler } from "../../src/PaymentHandler.sol";
+import { DKIMRegistry } from "../../src/DKIMRegistry.sol";
+import { ZKVerifier } from "../../src/ZKVerifier.sol";
 
 import { IPaymentHandler } from "../../src/interfaces/IPaymentHandler.sol";
 
@@ -13,7 +15,9 @@ contract PaymentHandlerBaseTest is BaseTest {
 
   function setUp() public virtual {
     operator = vm.addr(operatorPrivateKey);
-    paymentHandler = new PaymentHandler(address(usdc));
+    ZKVerifier _zkVerifier = new ZKVerifier();
+    DKIMRegistry _dkimRegistry = new DKIMRegistry(DEPLOYER);
+    paymentHandler = new PaymentHandler(address(usdc), address(_zkVerifier), address(_dkimRegistry));
   }
 
   function _initTransferRequest(
