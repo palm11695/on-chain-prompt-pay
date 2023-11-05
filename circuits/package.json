@@ -3,7 +3,8 @@
   "version": "2.1.0",
   "scripts": {
     "test:kbank": "NODE_OPTIONS=--max_old_space_size=16384 vitest run kbank",
-    "test:scb": "NODE_OPTIONS=--max_old_space_size=16384 vitest run scb"
+    "test:scb:phone": "NODE_OPTIONS=--max_old_space_size=16384 vitest run scb-phone",
+    "test:scb:id": "NODE_OPTIONS=--max_old_space_size=16384 vitest run scb-id"
   },
   "dependencies": {
     "@zk-email/circuits": "^3.2.0",
