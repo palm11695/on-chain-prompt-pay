@@ -59,30 +59,6 @@ export const useSignExchangeRate = ({
           message: messageHash,
         })
 
-        // const recover = await recoverMessageAddress({
-        //   message: messageHash,
-        //   signature: signature,
-        // })
-        // Should eq to account address
-        // console.log('recover:', recover)
-
-        // const isCorrect = await verifyMessage({
-        //   address: account ?? zeroAddress,
-        //   message: messageHash,
-        //   signature: signature,
-        // })
-        // console.log('isCorrect:', isCorrect)
-
-        // const verifiedMessage = hexToSignature(signature as Bytes)
-        // console.log('verifiedMessage:', verifiedMessage)
-
-        // const _signatureHex = signatureToHex({
-        //   r: verifiedMessage.r,
-        //   s: verifiedMessage.s,
-        //   v: verifiedMessage.v,
-        // })
-        // console.log('_signatureHex:', _signatureHex)
-
         setSignedMessage(signature)
         setIsSigning(false)
       } catch (err) {
@@ -97,7 +73,6 @@ export const useSignExchangeRate = ({
   const _verifiedMessage: Signature | undefined = useMemo(() => {
     if (!signedMessage) return undefined
 
-    // return hexToSignature(signedMessage as Bytes)
     return verifiedMessageHardCoded
   }, [signedMessage])
 

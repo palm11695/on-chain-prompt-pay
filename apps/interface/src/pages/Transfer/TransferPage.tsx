@@ -50,7 +50,7 @@ const TransferPage = () => {
 
     setReceiverType(receiverType)
     setReceiver(receiver ?? undefined)
-    setAmountIn(amount ?? '0')
+    setAmountIn(amount ? amount : '0.00')
   }, [search])
 
   const handleCancel = useCallback(() => {

@@ -3,24 +3,18 @@ import { QrScanner } from '@yudiel/react-qr-scanner'
 
 import scannerBox from '../../assets/scanner.png'
 import { useNavigate } from 'react-router-dom'
-import {
-  getQrErrorLabel,
-  simplifyAmount,
-  simplifyPromptPayAccount,
-} from '../../utils/utils'
+import { getQrErrorLabel, parsePromptPay } from '../../utils/utils'
 import Button from '../../components/Button'
 import { Modal } from '../../components/Modal'
 import { useOpenModal } from '../../hooks/useOpenModal'
 import closeButton from './../../assets/close.png'
 // import flipCamera from '../../assets/flip-camera.png'
 
-const phoneRegex = /01130066(\d{9})/
-const idRegex = /0213(\d{13})/
-const amountRegex = /54\d{1,9}\.\d{2}/
-
 export enum ReceiverType {
+  Unknown = 'Unknown',
   PromptPay = 'PromptPay',
   ID_Card = 'ID Card',
+  E_Wallet = 'E-Wallet',
 }
 
 export const QrCodeReader = () => {
@@ -34,36 +28,17 @@ export const QrCodeReader = () => {
 
   useEffect(() => {
     if (data) {
-      const idMatch = data.match(idRegex)
-      const phoneMatch = data.match(phoneRegex)
-      const amountMatch = data.match(amountRegex)
-      const receiverType = idMatch
-        ? ReceiverType.ID_Card
-        : ReceiverType.PromptPay
+      const { id, amount, type } = parsePromptPay(data)
 
-      const rawReceiverAddress =
-        receiverType === ReceiverType.ID_Card ? idMatch?.[1] : phoneMatch?.[1]
-      const simplifiedAddress = simplifyPromptPayAccount(
-        receiverType,
-        rawReceiverAddress,
-      )
-      const simplifiedAmount = simplifyAmount(amountMatch?.[0])
-
-      if (!simplifiedAddress || !simplifiedAmount || isError) {
-        const errorMsg = getQrErrorLabel(
-          simplifiedAddress,
-          simplifiedAmount,
-          isError,
-        )
+      if (!id || isError) {
+        const errorMsg = getQrErrorLabel(id, isError)
         setErrorMsg(errorMsg)
         handleOpen()
         return
       }
 
       if (!isError)
-        navigate(
-          `/transfer?type=${receiverType}&receiver=${simplifiedAddress}&amount=${simplifiedAmount}`,
-        )
+        navigate(`/transfer?type=${type}&receiver=${id}&amount=${amount ?? ''}`)
     }
   }, [data, isError])
 
