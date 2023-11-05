@@ -9,10 +9,7 @@ import {
   WriteContractUnpreparedArgs,
   prepareWriteContract,
   PrepareWriteContractConfig,
-  watchContractEvent,
-  WatchContractEventConfig,
-  WatchContractEventCallback,
-} from 'wagmi/actions'
+} from '@wagmi/core'
 
 import {
   useContractRead,
@@ -36,7 +33,8 @@ export const paymentHandlerABI = [
     type: 'constructor',
     inputs: [
       { name: '_token', internalType: 'address', type: 'address' },
-      { name: '_operator', internalType: 'address', type: 'address' },
+      { name: '_zkVerifier', internalType: 'address', type: 'address' },
+      { name: '_dkimRegistry', internalType: 'address', type: 'address' },
     ],
   },
   { type: 'error', inputs: [], name: 'ECDSAInvalidSignature' },
@@ -46,11 +44,13 @@ export const paymentHandlerABI = [
     name: 'ECDSAInvalidSignatureLength',
   },
   { type: 'error', inputs: [{ name: 's', internalType: 'bytes32', type: 'bytes32' }], name: 'ECDSAInvalidSignatureS' },
-  { type: 'error', inputs: [], name: 'PaymentHandler_ExceedDeadline' },
   { type: 'error', inputs: [], name: 'PaymentHandler_InvalidParams' },
+  { type: 'error', inputs: [], name: 'PaymentHandler_InvalidProof' },
+  { type: 'error', inputs: [], name: 'PaymentHandler_InvalidSignal' },
+  { type: 'error', inputs: [], name: 'PaymentHandler_KeyHashIsZero' },
   { type: 'error', inputs: [], name: 'PaymentHandler_NoTransferRequest' },
   { type: 'error', inputs: [], name: 'PaymentHandler_RequestIsLessThanOneDay' },
-  { type: 'error', inputs: [], name: 'PaymentHandler_SignerIsNotOperator' },
+  { type: 'error', inputs: [], name: 'PaymentHandler_StaleExchangeRate' },
   { type: 'error', inputs: [], name: 'PaymentHandler_TransferRequestAlreadyConfirmed' },
   { type: 'error', inputs: [], name: 'PaymentHandler_Unauthorized' },
   {
@@ -58,12 +58,19 @@ export const paymentHandlerABI = [
     anonymous: false,
     inputs: [
       { name: 'id', internalType: 'uint256', type: 'uint256', indexed: true },
-      { name: 'sender', internalType: 'address', type: 'address', indexed: true },
+      { name: 'operator', internalType: 'address', type: 'address', indexed: true },
       { name: 'thbAmount', internalType: 'uint256', type: 'uint256', indexed: false },
-      { name: 'exchangeRate', internalType: 'uint256', type: 'uint256', indexed: false },
-      { name: 'deadline', internalType: 'uint256', type: 'uint256', indexed: false },
+      { name: 'exchangeRateBps', internalType: 'uint16', type: 'uint16', indexed: false },
+      { name: 'promptPayId', internalType: 'string', type: 'string', indexed: false },
     ],
     name: 'TransferRequestInitiated',
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'BANK_DOMAIN',
+    outputs: [{ name: '', internalType: 'string', type: 'string' }],
   },
   {
     stateMutability: 'view',
@@ -82,17 +89,28 @@ export const paymentHandlerABI = [
   {
     stateMutability: 'nonpayable',
     type: 'function',
-    inputs: [{ name: '_transferRequestId', internalType: 'uint256', type: 'uint256' }],
+    inputs: [
+      { name: '_transferRequestId', internalType: 'uint256', type: 'uint256' },
+      { name: '_proof', internalType: 'uint256[8]', type: 'uint256[8]' },
+    ],
     name: 'confirmTransferRequest',
     outputs: [],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'dkimRegistry',
+    outputs: [{ name: '', internalType: 'contract IDKIMRegistry', type: 'address' }],
   },
   {
     stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       { name: '_thbAmount', internalType: 'uint256', type: 'uint256' },
-      { name: '_deadline', internalType: 'uint256', type: 'uint256' },
+      { name: '_rateExpiry', internalType: 'uint256', type: 'uint256' },
       { name: '_exchangeRateBps', internalType: 'uint16', type: 'uint16' },
+      { name: '_promptPayId', internalType: 'string', type: 'string' },
       { name: '_v', internalType: 'uint8', type: 'uint8' },
       { name: '_r', internalType: 'bytes32', type: 'bytes32' },
       { name: '_s', internalType: 'bytes32', type: 'bytes32' },
@@ -118,8 +136,8 @@ export const paymentHandlerABI = [
     stateMutability: 'view',
     type: 'function',
     inputs: [],
-    name: 'operator',
-    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    name: 'publicKeyHashIndex',
+    outputs: [{ name: '', internalType: 'uint32', type: 'uint32' }],
   },
   {
     stateMutability: 'view',
@@ -142,10 +160,19 @@ export const paymentHandlerABI = [
     name: 'transferRequests',
     outputs: [
       { name: 'sender', internalType: 'address', type: 'address' },
-      { name: 'tokenAmount', internalType: 'uint256', type: 'uint256' },
+      { name: 'operator', internalType: 'address', type: 'address' },
       { name: 'initTimestamp', internalType: 'uint256', type: 'uint256' },
-      { name: 'deadline', internalType: 'uint256', type: 'uint256' },
+      { name: 'tokenAmount', internalType: 'uint256', type: 'uint256' },
+      { name: 'thbAmount', internalType: 'uint256', type: 'uint256' },
+      { name: 'promptPayId', internalType: 'string', type: 'string' },
     ],
+  },
+  {
+    stateMutability: 'view',
+    type: 'function',
+    inputs: [],
+    name: 'zkVerifier',
+    outputs: [{ name: '', internalType: 'contract ZKVerifier', type: 'address' }],
   },
 ] as const
 
@@ -281,22 +308,6 @@ export function prepareWritePaymentHandler<
 }
 
 /**
- * Wraps __{@link watchContractEvent}__ with `abi` set to __{@link paymentHandlerABI}__.
- */
-export function watchPaymentHandlerEvent<
-  TAbi extends readonly unknown[] = typeof paymentHandlerABI,
-  TEventName extends string = string,
->(
-  config: Omit<WatchContractEventConfig<TAbi, TEventName>, 'abi'>,
-  callback: WatchContractEventCallback<TAbi, TEventName>,
-) {
-  return watchContractEvent(
-    { abi: paymentHandlerABI, ...config } as WatchContractEventConfig<TAbi, TEventName>,
-    callback,
-  )
-}
-
-/**
  * Wraps __{@link getContract}__ with `abi` set to __{@link erc20ABI}__.
  */
 export function getErc20(config: Omit<GetContractArgs, 'abi'>) {
@@ -336,16 +347,6 @@ export function prepareWriteErc20<
   >)
 }
 
-/**
- * Wraps __{@link watchContractEvent}__ with `abi` set to __{@link erc20ABI}__.
- */
-export function watchErc20Event<TAbi extends readonly unknown[] = typeof erc20ABI, TEventName extends string = string>(
-  config: Omit<WatchContractEventConfig<TAbi, TEventName>, 'abi'>,
-  callback: WatchContractEventCallback<TAbi, TEventName>,
-) {
-  return watchContractEvent({ abi: erc20ABI, ...config } as WatchContractEventConfig<TAbi, TEventName>, callback)
-}
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // React
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -365,6 +366,25 @@ export function usePaymentHandlerRead<
 }
 
 /**
+ * Wraps __{@link useContractRead}__ with `abi` set to __{@link paymentHandlerABI}__ and `functionName` set to `"BANK_DOMAIN"`.
+ */
+export function usePaymentHandlerBankDomain<
+  TFunctionName extends 'BANK_DOMAIN',
+  TSelectData = ReadContractResult<typeof paymentHandlerABI, TFunctionName>,
+>(
+  config: Omit<
+    UseContractReadConfig<typeof paymentHandlerABI, TFunctionName, TSelectData>,
+    'abi' | 'functionName'
+  > = {} as any,
+) {
+  return useContractRead({ abi: paymentHandlerABI, functionName: 'BANK_DOMAIN', ...config } as UseContractReadConfig<
+    typeof paymentHandlerABI,
+    TFunctionName,
+    TSelectData
+  >)
+}
+
+/**
  * Wraps __{@link useContractRead}__ with `abi` set to __{@link paymentHandlerABI}__ and `functionName` set to `"MAX_BPS"`.
  */
 export function usePaymentHandlerMaxBps<
@@ -377,6 +397,25 @@ export function usePaymentHandlerMaxBps<
   > = {} as any,
 ) {
   return useContractRead({ abi: paymentHandlerABI, functionName: 'MAX_BPS', ...config } as UseContractReadConfig<
+    typeof paymentHandlerABI,
+    TFunctionName,
+    TSelectData
+  >)
+}
+
+/**
+ * Wraps __{@link useContractRead}__ with `abi` set to __{@link paymentHandlerABI}__ and `functionName` set to `"dkimRegistry"`.
+ */
+export function usePaymentHandlerDkimRegistry<
+  TFunctionName extends 'dkimRegistry',
+  TSelectData = ReadContractResult<typeof paymentHandlerABI, TFunctionName>,
+>(
+  config: Omit<
+    UseContractReadConfig<typeof paymentHandlerABI, TFunctionName, TSelectData>,
+    'abi' | 'functionName'
+  > = {} as any,
+) {
+  return useContractRead({ abi: paymentHandlerABI, functionName: 'dkimRegistry', ...config } as UseContractReadConfig<
     typeof paymentHandlerABI,
     TFunctionName,
     TSelectData
@@ -422,10 +461,10 @@ export function usePaymentHandlerNextTransferRequestId<
 }
 
 /**
- * Wraps __{@link useContractRead}__ with `abi` set to __{@link paymentHandlerABI}__ and `functionName` set to `"operator"`.
+ * Wraps __{@link useContractRead}__ with `abi` set to __{@link paymentHandlerABI}__ and `functionName` set to `"publicKeyHashIndex"`.
  */
-export function usePaymentHandlerOperator<
-  TFunctionName extends 'operator',
+export function usePaymentHandlerPublicKeyHashIndex<
+  TFunctionName extends 'publicKeyHashIndex',
   TSelectData = ReadContractResult<typeof paymentHandlerABI, TFunctionName>,
 >(
   config: Omit<
@@ -433,11 +472,11 @@ export function usePaymentHandlerOperator<
     'abi' | 'functionName'
   > = {} as any,
 ) {
-  return useContractRead({ abi: paymentHandlerABI, functionName: 'operator', ...config } as UseContractReadConfig<
-    typeof paymentHandlerABI,
-    TFunctionName,
-    TSelectData
-  >)
+  return useContractRead({
+    abi: paymentHandlerABI,
+    functionName: 'publicKeyHashIndex',
+    ...config,
+  } as UseContractReadConfig<typeof paymentHandlerABI, TFunctionName, TSelectData>)
 }
 
 /**
@@ -495,6 +534,25 @@ export function usePaymentHandlerTransferRequests<
     functionName: 'transferRequests',
     ...config,
   } as UseContractReadConfig<typeof paymentHandlerABI, TFunctionName, TSelectData>)
+}
+
+/**
+ * Wraps __{@link useContractRead}__ with `abi` set to __{@link paymentHandlerABI}__ and `functionName` set to `"zkVerifier"`.
+ */
+export function usePaymentHandlerZkVerifier<
+  TFunctionName extends 'zkVerifier',
+  TSelectData = ReadContractResult<typeof paymentHandlerABI, TFunctionName>,
+>(
+  config: Omit<
+    UseContractReadConfig<typeof paymentHandlerABI, TFunctionName, TSelectData>,
+    'abi' | 'functionName'
+  > = {} as any,
+) {
+  return useContractRead({ abi: paymentHandlerABI, functionName: 'zkVerifier', ...config } as UseContractReadConfig<
+    typeof paymentHandlerABI,
+    TFunctionName,
+    TSelectData
+  >)
 }
 
 /**

@@ -149,6 +149,7 @@ const TransferContent = ({
       <TransferInput amountIn={amountIn} onChange={onChange} token={token} />
       <ValidationButton
         status={status}
+        promptPayId={receiver}
         amountIn={amountIn}
         token={token}
         balance={balance !== undefined ? balance : 0n}
@@ -183,6 +184,7 @@ const ReviewTxContent = ({
       <ReviewTxSummary amount={amountIn} token={token} />
       <ValidationButton
         amountIn={amountIn}
+        promptPayId={receiver}
         token={token}
         balance={balance !== undefined ? balance : 0n}
         status={status}
@@ -194,6 +196,7 @@ const ReviewTxContent = ({
 
 const ValidationButton = ({
   status,
+  promptPayId,
   amountIn,
   token,
   balance,
@@ -201,6 +204,7 @@ const ValidationButton = ({
   onCancel,
 }: {
   status: ActionStatus
+  promptPayId: string
   amountIn: string
   token: ITokenProfile
   balance: bigint
@@ -234,6 +238,7 @@ const ValidationButton = ({
     <div className="fixed bottom-0 left-0 flex w-full flex-col gap-y-2 px-4 pb-4">
       {status === ActionStatus.Review ? (
         <CreateInitTransferRequestButton
+          promptPayId={promptPayId}
           amount={normalizefromE18Decimal(parseEther(amountIn), token.decimal)}
           asset={token}
         />

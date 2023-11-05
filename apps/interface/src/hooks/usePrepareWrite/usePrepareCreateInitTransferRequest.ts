@@ -11,6 +11,7 @@ export interface InitTransferRequestCalldata {
   thbAmount: bigint
   exchangeRate: bigint
   deadline: bigint
+  promptPayId: string
   verifiedMessage: Signature | undefined
 }
 
@@ -18,6 +19,7 @@ const defaultInitTransferRequestCalldata: InitTransferRequestCalldata = {
   thbAmount: 0n,
   exchangeRate: 0n,
   deadline: 0n,
+  promptPayId: '',
   verifiedMessage: undefined,
 }
 
@@ -33,23 +35,40 @@ export const usePrepareCreateInitTransferRequest = ({
   onFail,
   enabled = true,
 }: IUsePrepareWriteParams<InitTransferRequestCalldata>): IUsePreparedWrite => {
-  const { thbAmount, exchangeRate, deadline, verifiedMessage } =
+  const { thbAmount, exchangeRate, deadline, promptPayId, verifiedMessage } =
     calldata ?? defaultInitTransferRequestCalldata
 
   const { v, r, s } = verifiedMessage ?? defaultVerifiedMessage
 
   const _enabled = useMemo(() => {
-    if (!enabled || !thbAmount || !exchangeRate || !deadline || !v || !r || !s)
+    if (
+      !enabled ||
+      !thbAmount ||
+      !exchangeRate ||
+      !deadline ||
+      !v ||
+      !r ||
+      !s ||
+      !promptPayId
+    )
       return false
 
     return true
-  }, [enabled, v, r, s, thbAmount, exchangeRate, deadline])
+  }, [enabled, v, r, s, thbAmount, exchangeRate, deadline, promptPayId])
 
   // prepare
   const { config: preparedConfig } =
     usePreparePaymentHandlerInitTransferRequest({
       address: contracts[ContractKey.PaymentHandler] as Address,
-      args: [thbAmount, deadline, Number(exchangeRate), Number(v), r, s],
+      args: [
+        thbAmount,
+        deadline,
+        Number(exchangeRate),
+        promptPayId,
+        Number(v),
+        r,
+        s,
+      ],
       enabled: _enabled,
     })
 
