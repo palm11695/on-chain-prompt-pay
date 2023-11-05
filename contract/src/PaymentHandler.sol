@@ -18,7 +18,6 @@ contract PaymentHandler is IPaymentHandler {
     address sender;
     address operator;
     uint256 initTimestamp;
-    uint256 deadline;
     uint256 tokenAmount;
     uint256 thbAmount;
     uint64 promptPayId;
@@ -85,7 +84,7 @@ contract PaymentHandler is IPaymentHandler {
 
   function initTransferRequest(
     uint256 _thbAmount,
-    uint256 _deadline,
+    uint256 _rateExpiry,
     uint16 _exchangeRateBps,
     uint64 _promptPayId,
     uint8 _v,
@@ -97,9 +96,9 @@ contract PaymentHandler is IPaymentHandler {
       revert PaymentHandler_InvalidParams();
     }
 
-    // revert if deadline is passed
-    if (_deadline < block.timestamp) {
-      revert PaymentHandler_ExceedDeadline();
+    // revert if exchange rate is stale
+    if (_rateExpiry < block.timestamp) {
+      revert PaymentHandler_StaleExchangeRate();
     }
 
     // calculate balance to lock
@@ -113,13 +112,12 @@ contract PaymentHandler is IPaymentHandler {
     reservedBalances[msg.sender] += tokenAmount;
 
     // store transfer request info
-    address operator = _getMessageSigner(_exchangeRateBps, _deadline, _v, _r, _s);
+    address operator = _getMessageSigner(_exchangeRateBps, _rateExpiry, _v, _r, _s);
     isTransferRequestConfirmed[nextTransferRequestId] = false;
     transferRequests[nextTransferRequestId] = TransferRequest(
       msg.sender,
       operator,
       block.timestamp,
-      _deadline,
       tokenAmount,
       _thbAmount,
       _promptPayId
@@ -185,11 +183,6 @@ contract PaymentHandler is IPaymentHandler {
     // revert if msg.sender is not operator
     if (msg.sender != req.operator) {
       revert PaymentHandler_Unauthorized();
-    }
-
-    // revert if deadline is passed
-    if (req.deadline < block.timestamp) {
-      revert PaymentHandler_ExceedDeadline();
     }
 
     // verify DKIM public key hash between on-chain and circuit

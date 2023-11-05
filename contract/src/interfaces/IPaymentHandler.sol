@@ -4,7 +4,7 @@ pragma solidity 0.8.21;
 interface IPaymentHandler {
   error PaymentHandler_InvalidParams();
   error PaymentHandler_RequestIsLessThanOneDay();
-  error PaymentHandler_ExceedDeadline();
+  error PaymentHandler_StaleExchangeRate();
   error PaymentHandler_Unauthorized();
   error PaymentHandler_NoTransferRequest();
   error PaymentHandler_TransferRequestAlreadyConfirmed();

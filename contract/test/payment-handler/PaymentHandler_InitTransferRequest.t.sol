@@ -79,9 +79,9 @@ contract PaymentHandlerInitTransferRequestTest is PaymentHandlerBaseTest {
     paymentHandler.initTransferRequest(1, block.timestamp, 1, 888, v, r, s);
   }
 
-  function testRevert_WhenInitTransferRequest_AndDeadlineExceed() public {
+  function testRevert_WhenInitTransferRequest_AndExchangeRateIsStale() public {
     vm.prank(ALICE);
-    vm.expectRevert(IPaymentHandler.PaymentHandler_ExceedDeadline.selector);
+    vm.expectRevert(IPaymentHandler.PaymentHandler_StaleExchangeRate.selector);
     paymentHandler.initTransferRequest(1, block.timestamp - 1, 1, 888, uint8(1), bytes32("0x"), bytes32("0x"));
   }
 }

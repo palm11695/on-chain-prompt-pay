@@ -148,19 +148,4 @@ contract PaymentHandlerConfirmTransferRequestTest is PaymentHandlerBaseTest {
     vm.expectRevert(IPaymentHandler.PaymentHandler_TransferRequestAlreadyConfirmed.selector);
     paymentHandler.confirmTransferRequest(transferRequestId, proof, publicSignals);
   }
-
-  function testRevert_WhenConfirmTransferRequest_WithExceedDeadline() public {
-    uint256[3] memory publicSignals;
-    uint256[8] memory proof;
-
-    _aliceInitTransferRequest();
-
-    vm.warp(block.timestamp + 1001);
-
-    // operator confirm transfer request
-    uint256 transferRequestId = 0;
-    vm.prank(operator);
-    vm.expectRevert(IPaymentHandler.PaymentHandler_ExceedDeadline.selector);
-    paymentHandler.confirmTransferRequest(transferRequestId, proof, publicSignals);
-  }
 }
