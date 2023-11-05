@@ -34,3 +34,8 @@ yarn-error.log*
 
 # vercel
 .vercel
+
+circuit.env
+entropy.env
+*.ptau
+*.eml
