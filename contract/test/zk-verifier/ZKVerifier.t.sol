@@ -14,62 +14,19 @@ contract ZKVerifierTest is Test {
     verifier = new ZKVerifier();
   }
 
-  function convertStringToPackedBytes(
-    string memory rawString,
-    uint256 packSize
-  ) public pure returns (uint256[] memory packedBytes) {
-    bytes memory stringBytes = bytes(rawString);
-    uint256 packedArraySize = (stringBytes.length + packSize - 1) / packSize;
-    packedBytes = new uint256[](packedArraySize);
-
-    for (uint256 i = 0; i < stringBytes.length; i++) {
-      uint256 packedIndex = i / packSize;
-      uint256 byteIndexWithinPacked = i % packSize;
-      packedBytes[packedIndex] |= uint256(uint8(stringBytes[i])) << (8 * byteIndexWithinPacked);
-    }
-
-    return packedBytes;
-  }
-
   function test_stringConversion() public {
-    // uint256[] memory packedBytes = new uint256[](3);
-    // packedBytes[0] = 28557011619965818;
-    // string memory byteList = StringUtils.convertPackedBytesToString(packedBytes, 15, 7);
-    // console.logString(byteList);
-    uint256[] memory packedBytes = convertStringToPackedBytes("662-6-02192-3", 31);
-    console.log(packedBytes[0]);
-    // console.log(packedBytes[1]);
+    uint256[] memory packedBytes = StringUtils.convertStringToPackedBytes("662-6-02192-3", 31);
+    assertEq(packedBytes[0], 4054623830042818900215125390902);
   }
 
   function test_verify() public {
     uint256[3] memory publicSignals;
     // pubkey_hash
-    // account
-    // address
-
     publicSignals[0] = 19430047151743734661547284238141409021047853263308871256452083578798143806083;
+    // account
     publicSignals[1] = 4054623830042818900215125390902;
+    // address
     publicSignals[2] = 0;
-
-    // publicSignals[0] = 19430047151743734661547284238141409021047853263308871256452083578798143806083;
-    // publicSignals[2] = 4054623830042818900215125390902;
-    // publicSignals[1] = 0;
-
-    // publicSignals[1] = 19430047151743734661547284238141409021047853263308871256452083578798143806083;
-    // publicSignals[0] = 4054623830042818900215125390902;
-    // publicSignals[2] = 0;
-
-    // publicSignals[1] = 19430047151743734661547284238141409021047853263308871256452083578798143806083;
-    // publicSignals[2] = 4054623830042818900215125390902;
-    // publicSignals[0] = 0;
-
-    // publicSignals[2] = 19430047151743734661547284238141409021047853263308871256452083578798143806083;
-    // publicSignals[0] = 4054623830042818900215125390902;
-    // publicSignals[1] = 0;
-
-    // publicSignals[2] = 19430047151743734661547284238141409021047853263308871256452083578798143806083;
-    // publicSignals[1] = 4054623830042818900215125390902;
-    // publicSignals[0] = 0;
 
     uint256[2] memory proof_a = [
       2272480160896829909518428411637247125535234088651787885535703227282845181370,
@@ -89,17 +46,6 @@ contract ZKVerifierTest is Test {
     uint256[2] memory proof_c = [
       4400119510940497671047370825247029698555336884030343094392538945802146097150,
       11633267222742183660566019016538467381053551416281348615315102951791598413224
-    ];
-
-    uint256[8] memory proof = [
-      proof_a[0],
-      proof_a[1],
-      proof_b[0][0],
-      proof_b[0][1],
-      proof_b[1][0],
-      proof_b[1][1],
-      proof_c[0],
-      proof_c[1]
     ];
 
     // Test proof verification

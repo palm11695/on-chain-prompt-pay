@@ -17,6 +17,11 @@ contract PaymentHandlerBaseTest is BaseTest {
     operator = vm.addr(operatorPrivateKey);
     ZKVerifier _zkVerifier = new ZKVerifier();
     DKIMRegistry _dkimRegistry = new DKIMRegistry(DEPLOYER);
+    vm.prank(DEPLOYER);
+    _dkimRegistry.setDKIMPublicKeyHash(
+      "kasikornbank.com",
+      bytes32(uint256(19430047151743734661547284238141409021047853263308871256452083578798143806083))
+    );
     paymentHandler = new PaymentHandler(address(usdc), address(_zkVerifier), address(_dkimRegistry));
   }
 
