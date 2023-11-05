@@ -3,14 +3,14 @@ pragma solidity 0.8.21;
 
 import { BaseTest } from "../BaseTest.t.sol";
 import { MockERC20 } from "../mocks/MockERC20.sol";
-import { PaymentHandler } from "../../src/KbankPaymentHandler.sol";
+import { KbankPaymentHandler } from "../../src/payment-handlers/KbankPaymentHandler.sol";
 import { DKIMRegistry } from "../../src/DKIMRegistry.sol";
-import { ZKVerifier } from "../../src/KbankZKVerifier.sol";
+import { ZKVerifier } from "../../src/verifiers/KbankZKVerifier.sol";
 
 import { IPaymentHandler } from "../../src/interfaces/IPaymentHandler.sol";
 
 contract PaymentHandlerBaseTest is BaseTest {
-  PaymentHandler internal paymentHandler;
+  KbankPaymentHandler internal paymentHandler;
   address internal operator;
 
   function setUp() public virtual {
@@ -22,7 +22,7 @@ contract PaymentHandlerBaseTest is BaseTest {
       "kasikornbank.com",
       bytes32(uint256(19430047151743734661547284238141409021047853263308871256452083578798143806083))
     );
-    paymentHandler = new PaymentHandler(address(usdc), address(_zkVerifier), address(_dkimRegistry));
+    paymentHandler = new KbankPaymentHandler(address(usdc), address(_zkVerifier), address(_dkimRegistry));
   }
 
   function _initTransferRequest(

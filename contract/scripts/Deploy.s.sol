@@ -2,9 +2,9 @@
 pragma solidity 0.8.21;
 
 import { Script, console2 } from "forge-std/Script.sol";
-import { SCBEWalletPaymentHandler } from "../src/SCBEWalletPaymentHandler.sol";
+import { SCBEWalletPaymentHandler } from "../src/payment-handlers/SCBEWalletPaymentHandler.sol";
 import { DKIMRegistry } from "../src/DKIMRegistry.sol";
-import { SCBEWalletZKVerifier } from "../src/SCBEWalletZKVerifier.sol";
+import { SCBEWalletZKVerifier } from "../src/verifiers/SCBEWalletZKVerifier.sol";
 
 contract DeploymentScript is Script {
   uint256 internal deployerPrivateKey = vm.envUint("DEPLOYER_PRIVATE_KEY");

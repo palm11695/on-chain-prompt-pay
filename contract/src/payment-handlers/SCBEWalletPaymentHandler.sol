@@ -5,16 +5,16 @@ pragma solidity 0.8.21;
 import { ERC20 } from "@solmate/tokens/ERC20.sol";
 import { SafeTransferLib } from "@solmate/utils/SafeTransferLib.sol";
 import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import { ZKVerifier } from "./KbankZKVerifier.sol";
+import { SCBEWalletZKVerifier } from "../verifiers/SCBEWalletZKVerifier.sol";
 
 // interfaces
-import { IPaymentHandler } from "./interfaces/IPaymentHandler.sol";
-import { IDKIMRegistry } from "./interfaces/IDKIMRegistry.sol";
+import { IPaymentHandler } from "../interfaces/IPaymentHandler.sol";
+import { IDKIMRegistry } from "../interfaces/IDKIMRegistry.sol";
 
 // utils
-import { StringUtils } from "./utils/StringUtils.sol";
+import { StringUtils } from "../utils/StringUtils.sol";
 
-contract KbankPaymentHandler is IPaymentHandler {
+contract SCBEWalletPaymentHandler is IPaymentHandler {
   using SafeTransferLib for ERC20;
 
   struct TransferRequest {
@@ -39,11 +39,11 @@ contract KbankPaymentHandler is IPaymentHandler {
   // === States ===
 
   ERC20 public immutable token;
-  ZKVerifier public immutable zkVerifier;
+  SCBEWalletZKVerifier public immutable zkVerifier;
   IDKIMRegistry public immutable dkimRegistry;
 
   uint16 public constant MAX_BPS = 10000;
-  string public constant BANK_DOMAIN = "kasikornbank.com";
+  string public constant BANK_DOMAIN = "scb.co.th";
 
   // index in signal array
   uint32 public constant publicKeyHashIndex = 0;
@@ -57,7 +57,7 @@ contract KbankPaymentHandler is IPaymentHandler {
   constructor(address _token, address _zkVerifier, address _dkimRegistry) {
     token = ERC20(_token);
     nextTransferRequestId = 0;
-    zkVerifier = ZKVerifier(_zkVerifier);
+    zkVerifier = SCBEWalletZKVerifier(_zkVerifier);
     dkimRegistry = IDKIMRegistry(_dkimRegistry);
   }
 
@@ -70,19 +70,6 @@ contract KbankPaymentHandler is IPaymentHandler {
   ) internal pure returns (address) {
     bytes32 hash = keccak256(abi.encodePacked(_exchangeRateBps, _deadline));
     return ECDSA.recover(hash, _v, _r, _s);
-  }
-
-  function _verifyDKIMPublicKeyHash(uint256 _signal) internal view {
-    bytes32 circuitKeyHash = bytes32(_signal);
-    bytes32 storedKeyHash = dkimRegistry.getDKIMPublicKeyHash(BANK_DOMAIN);
-
-    if (circuitKeyHash == bytes32(0) || storedKeyHash == bytes32(0)) {
-      revert PaymentHandler_KeyHashIsZero();
-    }
-
-    if (circuitKeyHash != storedKeyHash) {
-      revert PaymentHandler_InvalidSignal();
-    }
   }
 
   function initTransferRequest(

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.21;
 
-import { SCBEWalletZKVerifier } from "../../src/SCBEWalletZKVerifier.sol";
+import { SCBEWalletZKVerifier } from "../../src/verifiers/SCBEWalletZKVerifier.sol";
 
 import "forge-std/Test.sol";
 

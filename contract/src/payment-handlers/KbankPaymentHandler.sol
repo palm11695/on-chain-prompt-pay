@@ -5,16 +5,16 @@ pragma solidity 0.8.21;
 import { ERC20 } from "@solmate/tokens/ERC20.sol";
 import { SafeTransferLib } from "@solmate/utils/SafeTransferLib.sol";
 import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import { SCBEWalletZKVerifier } from "./SCBEWalletZKVerifier.sol";
+import { ZKVerifier } from "../verifiers/KbankZKVerifier.sol";
 
 // interfaces
-import { IPaymentHandler } from "./interfaces/IPaymentHandler.sol";
-import { IDKIMRegistry } from "./interfaces/IDKIMRegistry.sol";
+import { IPaymentHandler } from "../interfaces/IPaymentHandler.sol";
+import { IDKIMRegistry } from "../interfaces/IDKIMRegistry.sol";
 
 // utils
-import { StringUtils } from "./utils/StringUtils.sol";
+import { StringUtils } from "../utils/StringUtils.sol";
 
-contract SCBEWalletPaymentHandler is IPaymentHandler {
+contract KbankPaymentHandler is IPaymentHandler {
   using SafeTransferLib for ERC20;
 
   struct TransferRequest {
@@ -39,7 +39,7 @@ contract SCBEWalletPaymentHandler is IPaymentHandler {
   // === States ===
 
   ERC20 public immutable token;
-  SCBEWalletZKVerifier public immutable zkVerifier;
+  ZKVerifier public immutable zkVerifier;
   IDKIMRegistry public immutable dkimRegistry;
 
   uint16 public constant MAX_BPS = 10000;
@@ -57,7 +57,7 @@ contract SCBEWalletPaymentHandler is IPaymentHandler {
   constructor(address _token, address _zkVerifier, address _dkimRegistry) {
     token = ERC20(_token);
     nextTransferRequestId = 0;
-    zkVerifier = SCBEWalletZKVerifier(_zkVerifier);
+    zkVerifier = ZKVerifier(_zkVerifier);
     dkimRegistry = IDKIMRegistry(_dkimRegistry);
   }
 
@@ -70,6 +70,19 @@ contract SCBEWalletPaymentHandler is IPaymentHandler {
   ) internal pure returns (address) {
     bytes32 hash = keccak256(abi.encodePacked(_exchangeRateBps, _deadline));
     return ECDSA.recover(hash, _v, _r, _s);
+  }
+
+  function _verifyDKIMPublicKeyHash(uint256 _signal) internal view {
+    bytes32 circuitKeyHash = bytes32(_signal);
+    bytes32 storedKeyHash = dkimRegistry.getDKIMPublicKeyHash(BANK_DOMAIN);
+
+    if (circuitKeyHash == bytes32(0) || storedKeyHash == bytes32(0)) {
+      revert PaymentHandler_KeyHashIsZero();
+    }
+
+    if (circuitKeyHash != storedKeyHash) {
+      revert PaymentHandler_InvalidSignal();
+    }
   }
 
   function initTransferRequest(

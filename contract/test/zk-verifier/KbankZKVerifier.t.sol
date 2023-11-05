@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.21;
 
-import { ZKVerifier } from "../../src/KbankZKVerifier.sol";
+import { ZKVerifier } from "../../src/verifiers/KbankZKVerifier.sol";
 
 import "forge-std/Test.sol";
 
