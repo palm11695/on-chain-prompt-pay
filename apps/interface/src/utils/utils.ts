@@ -172,3 +172,9 @@ export const parsePromptPay = (data: string) => {
     type: receiverType,
   }
 }
+
+export const desimplifyPromptPayAccount = (promptPayId: string) => {
+  const wholePromptPayId = promptPayId.split('-')
+
+  return wholePromptPayId.join('')
+}

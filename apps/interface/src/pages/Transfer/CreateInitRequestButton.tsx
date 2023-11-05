@@ -7,16 +7,19 @@ import {
 import { ITokenProfile } from '../../configs/tokens'
 import { ContractKey, contracts } from '../../configs/contract'
 import { usePrepareApprove } from '../../hooks/usePrepareWrite/usePrepareApprove'
-import { Address, zeroAddress } from 'viem'
+import { Address, parseEther, zeroAddress } from 'viem'
 import { useSignExchangeRate } from '../../hooks/useSignExchangeRate'
 import { useExchangeRates } from '../../hooks/useExchangeRates'
 import { usePrepareCreateInitTransferRequest } from '../../hooks/usePrepareWrite/usePrepareCreateInitTransferRequest'
 import { useNavigate } from 'react-router-dom'
+import { desimplifyPromptPayAccount } from '../../utils/utils'
+import { tokenPrices } from '../../configs/prices'
+import { USD_THB } from '../../utils/constants'
 
 interface ICreateInitTransferRequestCalldata {
   amount: bigint
   asset: ITokenProfile
-  transferTo?: string
+  promptPayId: string
 }
 
 export const defaultValidationButton = {
@@ -28,6 +31,7 @@ export const defaultValidationButton = {
 export const CreateInitTransferRequestButton = ({
   amount,
   asset,
+  promptPayId,
 }: ICreateInitTransferRequestCalldata) => {
   // contexts
   const { tokenAllowances, account } = useAccountContextState()
@@ -41,7 +45,10 @@ export const CreateInitTransferRequestButton = ({
     calldata: {
       asset,
       spender: contracts[ContractKey.PaymentHandler] as Address,
-      amount,
+      amount:
+        (amount * BigInt(1e6)) /
+        (parseEther((tokenPrices[asset.displaySymbol] * USD_THB).toString()) /
+          BigInt(1e12)),
     },
     onSuccess: () => refetchTokenStates(),
   })
@@ -59,6 +66,7 @@ export const CreateInitTransferRequestButton = ({
         thbAmount: amount,
         deadline: deadline,
         exchangeRate: exchangeRates[asset.displaySymbol],
+        promptPayId: desimplifyPromptPayAccount(promptPayId),
         verifiedMessage: verifiedMessage,
       },
       onSuccess: () => {
@@ -71,7 +79,10 @@ export const CreateInitTransferRequestButton = ({
     if (!tokenAllowances) return undefined
 
     return (
-      tokenAllowances[asset.displaySymbol][ContractKey.PaymentHandler] < amount
+      tokenAllowances[asset.displaySymbol][ContractKey.PaymentHandler] <
+      (amount * BigInt(1e6)) /
+        (parseEther((tokenPrices[asset.displaySymbol] * USD_THB).toString()) /
+          BigInt(1e12))
     )
   }, [amount, tokenAllowances])
 
@@ -81,18 +92,20 @@ export const CreateInitTransferRequestButton = ({
       return { ...defaultValidationButton, disabled: true }
 
     // Approve
-    if (isApprovalNeeded)
+    if (isApprovalNeeded) {
+      if (isApproving)
+        return {
+          ...defaultValidationButton,
+          label: 'Approving',
+          disabled: true,
+        }
+
       return {
         ...defaultValidationButton,
         label: 'Approve',
         action: approveToken,
       }
-    if (isApproving)
-      return {
-        ...defaultValidationButton,
-        label: 'Approving',
-        disabled: true,
-      }
+    }
 
     // Sign Message
     if (!verifiedMessage) {
@@ -122,6 +135,7 @@ export const CreateInitTransferRequestButton = ({
   }, [
     isApprovalNeeded,
     verifiedMessage,
+    isApproving,
     isSigning,
     approveToken,
     handleSignExchangeRate,
