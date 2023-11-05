@@ -7,6 +7,7 @@ import TopUpPortal from './pages/TopUpPortal/TopUpPortal'
 import { ConnectWalletPage } from './components/OnBoarding/ConnectWalletPage'
 import { QrCodeReader } from './pages/Reader/QrCodeReader'
 import LoadingPage from './pages/Loading/Loading'
+import { SuccessPage } from './pages/Success/Success'
 
 const router = createBrowserRouter([
   {
@@ -40,6 +41,10 @@ const router = createBrowserRouter([
   {
     path: '/loading',
     element: <LoadingPage />,
+  },
+  {
+    path: '/success',
+    element: <SuccessPage />,
   },
   {
     path: '*',

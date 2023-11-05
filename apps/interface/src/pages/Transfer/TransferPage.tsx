@@ -2,7 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import Button from '../../components/Button'
 import Container from '../../components/Container'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { etherDecimal, normalizefromE18Decimal } from '../../utils/utils'
+import { normalizefromE18Decimal } from '../../utils/utils'
 import { useAccountContextState } from '../context/AccountContextProvider'
 import LoadingPage from '../Loading/Loading'
 import { AccountSection } from '../../components/AccountSection'
@@ -10,17 +10,13 @@ import { ITokenProfile, usdc } from '../../configs/tokens'
 import { TransferInput } from '../../components/TransferInput'
 import { ReceiverType } from '../Reader/QrCodeReader'
 import { parseEther, zeroAddress } from 'viem'
-import {
-  CreateInitTransferRequestButton,
-  defaultValidationButton,
-} from './CreateInitRequestButton'
+import { CreateInitTransferRequestButton } from './CreateInitRequestButton'
 import { ReviewTxSummary } from '../../components/ReviewTxSummary'
-import { tokenPrices } from '../../configs/prices'
-import { USD_THB } from '../../utils/constants'
 
 export enum ActionStatus {
   Transfer = 'Transfer',
   Review = 'Review',
+  Success = 'Success',
 }
 
 const TransferPage = () => {
@@ -60,9 +56,7 @@ const TransferPage = () => {
   }, [status])
 
   const loadingLabel = useMemo(() => {
-    return status === ActionStatus.Transfer
-      ? 'Loading...'
-      : 'Fetching best quote...'
+    return status === ActionStatus.Transfer ? 'Loading...' : 'Waiting for tx...'
   }, [status])
 
   return (
@@ -83,7 +77,7 @@ const TransferPage = () => {
           onChange={setAmountIn}
           onClick={() => {
             setIsLoading(true)
-            setStatus(ActionStatus.Review)
+            setStatus(ActionStatus.Success)
           }}
           onCancel={handleCancel}
         />

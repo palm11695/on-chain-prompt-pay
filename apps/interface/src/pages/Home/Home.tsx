@@ -122,7 +122,11 @@ export const Home = () => {
         </div>
 
         <div className="fixed bottom-0 left-0 flex w-full flex-col gap-y-1.5 px-4 pb-4">
-          <Button disabled={isDisabled} onClick={() => navigate('/qr-reader')}>
+          <Button
+            disabled={isDisabled}
+            onClick={() => navigate('/qr-reader')}
+            buttonClass="mb-3"
+          >
             Pay via QR
           </Button>
           {/* <Button

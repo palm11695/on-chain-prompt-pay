@@ -7,13 +7,20 @@ interface ILoadingPageProps {
   path?: string
   isComponent?: boolean
   component?: ReactNode
+  onClick?: () => void
 }
 
-const LoadingPage = ({ label, path, isComponent }: ILoadingPageProps) => {
+const LoadingPage = ({
+  label,
+  path,
+  isComponent,
+  onClick,
+}: ILoadingPageProps) => {
   const navigate = useNavigate()
 
   const { search } = useLocation()
   useEffect(() => {
+    console.log('search:', search)
     const goTo = new URLSearchParams(search).get('goTo')
     const delay = new URLSearchParams(search).get('delay')
     const params = new URLSearchParams(search)
@@ -32,7 +39,10 @@ const LoadingPage = ({ label, path, isComponent }: ILoadingPageProps) => {
   }, [search, path])
 
   return (
-    <div className="flex h-[100vh] flex-col items-center justify-center gap-6">
+    <div
+      className="flex h-[100vh] flex-col items-center justify-center gap-6"
+      onClick={onClick}
+    >
       <ReactLoading type={'spin'} color={'#3D70FF'} height={100} width={100} />
       <div className="text-2xl tracking-wide">
         {label ? label : 'Loading...'}

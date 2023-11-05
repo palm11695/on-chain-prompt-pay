@@ -76,7 +76,7 @@ export const CreateInitTransferRequestButton = ({
       },
       onSuccess: () => {
         refetchTokenStates()
-        setTimeout(() => navigate('/loading?goTo=success'))
+        setTimeout(() => navigate('/success'))
       },
     })
 
