@@ -195,12 +195,12 @@ const ReviewTxContent = ({
 }
 
 const ValidationButton = ({
-  status,
+  // status,
   promptPayId,
   amountIn,
   token,
-  balance,
-  onClick,
+  // balance,
+  // onClick,
   onCancel,
 }: {
   status: ActionStatus
@@ -211,45 +211,27 @@ const ValidationButton = ({
   onClick?: React.Dispatch<React.SetStateAction<ActionStatus>>
   onCancel: () => void
 }) => {
-  const { label, disabled } = useMemo(() => {
-    if (Number(amountIn) <= 0)
-      return {
-        ...defaultValidationButton,
-        disabled: true,
-      }
-
-    if (
-      Number(amountIn) / (tokenPrices[token.displaySymbol] * USD_THB) >
-      Number(balance) / etherDecimal(token.decimal)
-    )
-      return {
-        ...defaultValidationButton,
-        label: 'Insufficient Balance',
-        disabled: true,
-      }
-
-    return {
-      label: 'Confirm and Pay',
-      disabled: false,
-    }
-  }, [amountIn, balance])
-
   return (
     <div className="fixed bottom-0 left-0 flex w-full flex-col gap-y-2 px-4 pb-4">
-      {status === ActionStatus.Review ? (
+      {/* {status === ActionStatus.Review ? (
         <CreateInitTransferRequestButton
           promptPayId={promptPayId}
           amount={normalizefromE18Decimal(parseEther(amountIn), token.decimal)}
           asset={token}
         />
-      ) : (
-        <Button
+        ) : (
+          <Button
           onClick={() => onClick?.(ActionStatus.Review)}
           disabled={disabled}
-        >
+          >
           {label}
-        </Button>
-      )}
+          </Button>
+        )} */}
+      <CreateInitTransferRequestButton
+        promptPayId={promptPayId}
+        thbAmount={normalizefromE18Decimal(parseEther(amountIn), token.decimal)}
+        asset={token}
+      />
       <Button variant="danger" onClick={onCancel}>
         Cancel
       </Button>
