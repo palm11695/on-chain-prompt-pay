@@ -4,7 +4,8 @@
   "scripts": {
     "test:kbank": "NODE_OPTIONS=--max_old_space_size=16384 vitest run kbank",
     "test:scb:phone": "NODE_OPTIONS=--max_old_space_size=16384 vitest run scb-phone",
-    "test:scb:id": "NODE_OPTIONS=--max_old_space_size=16384 vitest run scb-id"
+    "test:scb:id": "NODE_OPTIONS=--max_old_space_size=16384 vitest run scb-id",
+    "test:scb:ewallet": "NODE_OPTIONS=--max_old_space_size=16384 vitest run scb-ewallet"
   },
   "dependencies": {
     "@zk-email/circuits": "^3.2.0",

@@ -7,8 +7,7 @@ const path = require('path')
 const fs = require('fs')
 const wasm_tester = require('circom_tester').wasm
 
-const account_len = 20
-export const STRING_PRESELECTOR = 'L3RkPjwvdHI+PHRyPjx0ZD48L3Rk'
+export const STRING_PRESELECTOR = 'ZS1XYWxsZXQgSUQ8L3RkPjx0ZD4'
 export const MAX_HEADER_PADDED_BYTES = 640 // NOTE: this must be the same as the first arg in the email in main args circom
 export const MAX_BODY_PADDED_BYTES = 4096 // NOTE: this must be the same as the arg to sha the remainder number of bytes in the email in main args circom
 
@@ -21,20 +20,25 @@ beforeAll(async () => {
   console.log('skipCircuit', skipCircuit)
 
   if (!skipCircuit) {
-    circuit = await wasm_tester(path.join(__dirname, '../scb_id.circom'), {
+    circuit = await wasm_tester(path.join(__dirname, '../scb_ewallet.circom'), {
       // NOTE: We are running tests against pre-compiled circuit in the below path
       // You need to manually compile when changes are made to circuit if `recompile` is set to `false`.
       recompile: true,
-      output: path.join(__dirname, '../build/scb_id'),
+      output: path.join(__dirname, '../build/scb_ewallet'),
       include: path.join(__dirname, '../node_modules'),
     })
   }
 
-  const rawEmail = fs.readFileSync(path.join(__dirname, '../emls/scb_id.eml'), 'utf8')
+  const rawEmail = fs.readFileSync(path.join(__dirname, '../emls/scb_ewallet.eml'), 'utf8')
   dkimResult = await verifyDKIMSignature(rawEmail)
 })
 
 test('should verify account', async () => {
+  const selector = new TextEncoder().encode(STRING_PRESELECTOR)
+  const selectorIndex = findIndexInUint8Array(dkimResult.body, selector)
+  console.log('selectorIndex', selectorIndex)
+  console.log('dkimResult.body', dkimResult.body.map((c) => Number(c)).slice(selectorIndex, selectorIndex + 100))
+
   const emailVerifierInputs = generateCircuitInputs({
     rsaSignature: dkimResult.signature,
     rsaPublicKey: dkimResult.publicKey,
@@ -48,7 +52,7 @@ test('should verify account', async () => {
 
   const bodyRemaining = emailVerifierInputs.in_body_padded!.map((c) => Number(c)) // Char array to Uint8Array
   const selectorBuffer = Buffer.from(STRING_PRESELECTOR)
-  const usernameIndex = Buffer.from(bodyRemaining).indexOf(selectorBuffer) - account_len - 1
+  const usernameIndex = Buffer.from(bodyRemaining).indexOf(selectorBuffer) + selectorBuffer.length
 
   const ethereumAddress = '0x00000000000000000000'
   const address = bytesToBigInt(fromHex(ethereumAddress)).toString()
@@ -93,10 +97,12 @@ test('should fail to verify account if account index is invalid', async () => {
   }
   scbVerifierInputs.account_idx = (Number(scbVerifierInputs.account_idx) + 1).toString()
 
-  try {
-    const witness = await circuit.calculateWitness(scbVerifierInputs)
-    await circuit.checkConstraints(witness)
-  } catch (error) {
-    expect((error as Error).message).toMatch('Assert Failed')
+  if (!skipCircuit) {
+    try {
+      const witness = await circuit.calculateWitness(scbVerifierInputs)
+      await circuit.checkConstraints(witness)
+    } catch (error) {
+      expect((error as Error).message).toMatch('Assert Failed')
+    }
   }
 })
