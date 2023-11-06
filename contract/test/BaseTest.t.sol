@@ -20,7 +20,8 @@ contract BaseTest is Test {
     vm.label(ALICE, "ALICE");
     vm.label(BOB, "BOB");
 
-    operatorPrivateKey = vm.createWallet("OPERATOR").privateKey;
+    // operatorPrivateKey = vm.createWallet("OPERATOR").privateKey;
+    operatorPrivateKey = uint256(vm.envBytes32("OPERATOR_PRIVATE_KEY"));
 
     usdc = new MockERC20("USD Coin", "USDC", 18);
     usdc.mint(ALICE, 1000);
@@ -33,5 +34,16 @@ contract BaseTest is Test {
   ) internal view returns (uint8 v, bytes32 r, bytes32 s) {
     bytes32 messageHash = keccak256(abi.encodePacked(_exchangeRateBps, _deadline));
     return vm.sign(operatorPrivateKey, messageHash);
+  }
+
+  function test_OperatorSign() public {
+    (uint8 v, bytes32 r, bytes32 s) = _operatorSign(285, 2 ** 128);
+    console2.log(v);
+    console2.logBytes32(r);
+    console2.logBytes32(s);
+  }
+
+  function test_conversion() public {
+    console2.log(uint256(uint160(address(0x00D8cD1F00558D275f6501Ae00Ef8a7D4b40A7E8))));
   }
 }

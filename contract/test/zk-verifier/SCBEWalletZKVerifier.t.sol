@@ -14,6 +14,10 @@ contract SCBEWalletZKVerifierTest is Test {
     verifier = new SCBEWalletZKVerifier();
   }
 
+  function test_ConvertString() public {
+    console.log(StringUtils.convertStringToPackedBytes("gMDA0OTk5MDQ1MjAzNjQy", 31)[0]);
+  }
+
   function test_SCBEWallet_VerifyProof() public {
     uint256[3] memory publicSignals;
     // pubkey_hash
