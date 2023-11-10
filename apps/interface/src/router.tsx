@@ -1,5 +1,5 @@
 import { createBrowserRouter } from 'react-router-dom'
-import { Home } from './pages/Home/Home'
+import { HomeWrapper } from './pages/Home/Home'
 import TransferPage from './pages/Transfer/TransferPage'
 import { ConnectWalletPage } from './components/OnBoarding/ConnectWalletPage'
 import { QrCodeReader } from './pages/Reader/QrCodeReader'
@@ -9,7 +9,7 @@ import { SuccessPage } from './pages/Success/Success'
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Home />,
+    element: <HomeWrapper />,
   },
   {
     path: '/connect-wallet',
@@ -33,7 +33,7 @@ const router = createBrowserRouter([
   },
   {
     path: '*',
-    element: <Home />,
+    element: <HomeWrapper />,
   },
 ])
 

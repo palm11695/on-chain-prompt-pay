@@ -17,7 +17,7 @@ export const AccountContextProvider = ({
 }: {
   children: ReactNode
 }): JSX.Element => {
-  const { address } = useAccount()
+  const { address, isConnected } = useAccount()
   const chain = usePageChain()
 
   const {
@@ -30,6 +30,7 @@ export const AccountContextProvider = ({
     <ContextState.Provider
       value={{
         account: address,
+        isConnected,
         tokenBalances,
         tokenAllowances,
       }}

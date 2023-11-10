@@ -29,7 +29,8 @@ export const parseAddressFromEncryptedWallet = (encryptedWallet: string) => {
   return encryptedWallet ? `0x${JSON.parse(encryptedWallet).address}` : ''
 }
 
-export const middleEllipsis = (text: string): string => {
+export const middleEllipsis = (text: string | undefined): string => {
+  if (!text) return ''
   return text.substr(0, 4) + '...' + text.substr(text.length - 4, text.length)
 }
 
