@@ -1,3 +1,4 @@
+import { Signature } from 'viem'
 import { ContractKey } from './configs/contract'
 import { TokenSymbol } from './configs/tokens'
 
@@ -12,3 +13,9 @@ export type ITokenAllowanceMap = Record<
 export type IContractAddressMap = Record<ContractKey, string>
 
 export type Bytes = `0x${string}`
+
+export type ZEXInfo = {
+  exchangeRate: bigint
+  deadline: bigint
+  signature: Signature
+}

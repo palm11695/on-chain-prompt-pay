@@ -8,21 +8,12 @@ import Button from '../../components/Button'
 import { Modal } from '../../components/Modal'
 import { useOpenModal } from '../../hooks/useOpenModal'
 import closeButton from './../../assets/close.png'
-// import flipCamera from '../../assets/flip-camera.png'
-
-export enum ReceiverType {
-  Unknown = 'Unknown',
-  PromptPay = 'PromptPay',
-  ID_Card = 'ID Card',
-  E_Wallet = 'E-Wallet',
-}
 
 export const QrCodeReader = () => {
   const [data, setData] = useState<string | undefined>(undefined)
   const [errorMsg, setErrorMsg] = useState('')
   const [isError, setIsError] = useState<boolean | undefined>(undefined)
 
-  // const [camera, setCamera] = useState<'environment' | 'user'>('user')
   const navigate = useNavigate()
   const { isOpen, handleOpen, handleClose } = useOpenModal()
 
@@ -40,7 +31,7 @@ export const QrCodeReader = () => {
       if (!isError)
         navigate(`/transfer?type=${type}&receiver=${id}&amount=${amount ?? ''}`)
     }
-  }, [data, isError])
+  }, [data, handleOpen, isError, navigate])
 
   const handleCloseModal = () => {
     handleClose()
@@ -54,14 +45,12 @@ export const QrCodeReader = () => {
       <Modal
         label="Unable to process"
         content={
-          <>
-            <div className="flex flex-col items-center justify-between gap-4">
-              {errorMsg}
-              <Button variant="primary" onClick={handleCloseModal}>
-                Try again
-              </Button>
-            </div>
-          </>
+          <div className="flex flex-col items-center justify-between gap-4">
+            {errorMsg}
+            <Button variant="primary" onClick={handleCloseModal}>
+              Try again
+            </Button>
+          </div>
         }
         isOpen={isOpen}
         onClose={handleCloseModal}
@@ -86,7 +75,6 @@ export const QrCodeReader = () => {
               height: '100vh',
               background: 'bg-gray-900',
             }}
-            // constraints={{ facingMode: camera }}
           />
         </div>
         <div className="absolute left-0 top-0 z-40 flex pl-5 pt-5">
@@ -97,14 +85,6 @@ export const QrCodeReader = () => {
             <img src={closeButton} className="w-5" />
           </Button>
         </div>
-        {/* <div className="absolute bottom-0 right-0 z-50 pb-5 pr-5">
-        <Button
-          className="rounded-lg border-2 border-slate-500 bg-slate-300 px-4  py-2"
-          onClick={() => navigate('/')}
-        >
-          <img className="w-10" src={flipCamera} />
-        </Button>
-      </div> */}
       </div>
     </>
   )

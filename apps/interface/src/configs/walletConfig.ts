@@ -21,7 +21,7 @@ const {
 export const chains = _chains
 
 const { connectors } = getDefaultWallets({
-  appName: 'OnChainPromptPay App',
+  appName: 'zkPromptPay App',
   projectId: 'YOUR_PROJECT_ID',
   chains,
 })

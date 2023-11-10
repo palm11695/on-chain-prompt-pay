@@ -7,25 +7,18 @@ import {
 import { ITokenProfile } from '../../configs/tokens'
 import { ContractKey, contracts } from '../../configs/contract'
 import { usePrepareApprove } from '../../hooks/usePrepareWrite/usePrepareApprove'
-import { Address, parseEther, zeroAddress } from 'viem'
-import { useSignExchangeRate } from '../../hooks/useSignExchangeRate'
+import { Address, parseEther } from 'viem'
 import { useExchangeRates } from '../../hooks/useExchangeRates'
 import { usePrepareCreateInitTransferRequest } from '../../hooks/usePrepareWrite/usePrepareCreateInitTransferRequest'
 import { useNavigate } from 'react-router-dom'
 import { desimplifyPromptPayAccount } from '../../utils/utils'
 import { tokenPrices } from '../../configs/prices'
-import { USD_THB } from '../../utils/constants'
+import { USD_THB, hardCodedZEXInfo } from '../../utils/constants'
 
 interface ICreateInitTransferRequestCalldata {
   thbAmount: bigint
   asset: ITokenProfile
   promptPayId: string
-}
-
-export const defaultValidationButton = {
-  label: 'Confirm and Pay',
-  disabled: false,
-  action: () => undefined,
 }
 
 export const CreateInitTransferRequestButton = ({
@@ -34,7 +27,7 @@ export const CreateInitTransferRequestButton = ({
   promptPayId,
 }: ICreateInitTransferRequestCalldata) => {
   // contexts
-  const { tokenAllowances, account, tokenBalances } = useAccountContextState()
+  const { tokenAllowances, tokenBalances } = useAccountContextState()
   const { refetchTokenStates } = useAccountContextActions()
   const navigate = useNavigate()
   // hooks
@@ -46,7 +39,7 @@ export const CreateInitTransferRequestButton = ({
       (parseEther((tokenPrices[asset.displaySymbol] * USD_THB).toString()) /
         BigInt(1e12))
     )
-  }, [thbAmount])
+  }, [asset.displaySymbol, thbAmount])
 
   // use prepare write approve
   const { write: approveToken, isLoading: isApproving } = usePrepareApprove({
@@ -58,28 +51,6 @@ export const CreateInitTransferRequestButton = ({
     onSuccess: () => refetchTokenStates(),
   })
 
-  // use sign exchange rate
-  const { handleSignExchangeRate, isSigning, verifiedMessage, deadline } =
-    useSignExchangeRate({
-      exchangeRate: exchangeRates[asset.displaySymbol],
-      account: (account as Address) ?? zeroAddress,
-    })
-
-  const { write: createInitTransferRequest, isLoading: isCreating } =
-    usePrepareCreateInitTransferRequest({
-      calldata: {
-        thbAmount: thbAmount,
-        deadline: deadline,
-        exchangeRate: exchangeRates[asset.displaySymbol],
-        promptPayId: desimplifyPromptPayAccount(promptPayId),
-        verifiedMessage: verifiedMessage,
-      },
-      onSuccess: () => {
-        refetchTokenStates()
-        setTimeout(() => navigate('/success'))
-      },
-    })
-
   const isApprovalNeeded: boolean | undefined = useMemo(() => {
     if (!tokenAllowances) return undefined
 
@@ -87,7 +58,32 @@ export const CreateInitTransferRequestButton = ({
       tokenAllowances[asset.displaySymbol][ContractKey.PaymentHandler] <
       tokenTransferAmount
     )
-  }, [tokenTransferAmount, tokenAllowances])
+  }, [tokenAllowances, asset.displaySymbol, tokenTransferAmount])
+
+  const { write: createInitTransferRequest, isLoading: isCreating } =
+    usePrepareCreateInitTransferRequest({
+      calldata: {
+        thbAmount: thbAmount,
+        deadline: hardCodedZEXInfo.deadline,
+        exchangeRate: exchangeRates[asset.displaySymbol],
+        promptPayId: desimplifyPromptPayAccount(promptPayId),
+        zexSignature: hardCodedZEXInfo.signature,
+      },
+      onSuccess: () => {
+        refetchTokenStates()
+        setTimeout(() => navigate('/success'))
+      },
+      enabled: !isApprovalNeeded,
+    })
+
+  // prevent re-render
+  const defaultValidationButton = useMemo(() => {
+    return {
+      label: 'Confirm and Pay',
+      disabled: false,
+      action: () => undefined,
+    }
+  }, [])
 
   // build label, disable, action
   const { label, disabled, action } = useMemo(() => {
@@ -123,22 +119,6 @@ export const CreateInitTransferRequestButton = ({
       }
     }
 
-    // Sign Message
-    if (!verifiedMessage) {
-      if (isSigning)
-        return {
-          ...defaultValidationButton,
-          label: 'Signing...',
-          disabled: true,
-        }
-
-      return {
-        ...defaultValidationButton,
-        label: 'Sign Message',
-        action: handleSignExchangeRate,
-      }
-    }
-
     if (isCreating) {
       return {
         ...defaultValidationButton,
@@ -147,18 +127,21 @@ export const CreateInitTransferRequestButton = ({
       }
     }
 
-    return { ...defaultValidationButton, action: createInitTransferRequest }
+    return {
+      ...defaultValidationButton,
+      action: createInitTransferRequest,
+    }
   }, [
+    isApprovalNeeded,
+    tokenBalances,
+    defaultValidationButton,
     thbAmount,
     tokenTransferAmount,
-    tokenBalances,
-    isApprovalNeeded,
-    verifiedMessage,
-    isApproving,
-    isSigning,
-    approveToken,
-    handleSignExchangeRate,
+    asset.displaySymbol,
+    isCreating,
     createInitTransferRequest,
+    isApproving,
+    approveToken,
   ])
 
   return (

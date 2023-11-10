@@ -1,9 +1,9 @@
-import { ReceiverType } from '../pages/Reader/QrCodeReader'
+import { ReceiverType } from '../enums'
 
-const phoneRegex = /01130066(\d{9})/
-const idCardRegex = /0213(\d{13})/
-const eWalletRegex = /0315(\d{15})/
-const amountRegex = /54\d{1,9}\.\d{2}/
+const PHONE_REGEX = /01130066(\d{9})/
+const ID_CARD_REGEX = /0213(\d{13})/
+const E_WALLET_REGEX = /0315(\d{15})/
+const AMOUNT_REGEX = /54\d{1,9}\.\d{2}/
 
 interface IRegrexes {
   type: ReceiverType
@@ -13,15 +13,15 @@ interface IRegrexes {
 const idRegexes: IRegrexes[] = [
   {
     type: ReceiverType.PromptPay,
-    regex: phoneRegex,
+    regex: PHONE_REGEX,
   },
   {
     type: ReceiverType.ID_Card,
-    regex: idCardRegex,
+    regex: ID_CARD_REGEX,
   },
   {
     type: ReceiverType.E_Wallet,
-    regex: eWalletRegex,
+    regex: E_WALLET_REGEX,
   },
 ]
 
@@ -29,7 +29,8 @@ export const parseAddressFromEncryptedWallet = (encryptedWallet: string) => {
   return encryptedWallet ? `0x${JSON.parse(encryptedWallet).address}` : ''
 }
 
-export const middleEllipsis = (text: string): string => {
+export const middleEllipsis = (text: string | undefined): string => {
+  if (!text) return ''
   return text.substr(0, 4) + '...' + text.substr(text.length - 4, text.length)
 }
 
@@ -68,29 +69,6 @@ export const simplifyPromptPayAccount = (
       default:
         return value
     }
-
-    // if (accountType === ReceiverType.ID_Card) {
-    //   const idIndices = [0, 1, 5, 10, 12, 13]
-
-    //   for (let i = 0; i < idIndices.length; i++) {
-    //     const start = idIndices[i]
-    //     const end = idIndices[i + 1]
-    //     if (end !== undefined) {
-    //       parts.push(value.slice(start, end))
-    //     }
-    //   }
-    // } else {
-    //   const mobileIndices = [0, 2, 5, 9]
-
-    //   for (let i = 0; i < mobileIndices.length; i++) {
-    //     const start = mobileIndices[i]
-    //     const end = mobileIndices[i + 1]
-    //     if (end !== undefined) {
-    //       if (i === 0) parts.push('0' + value.slice(start, end))
-    //       else parts.push(value.slice(start, end))
-    //     }
-    //   }
-    // }
 
     return parts.join('-')
   }
@@ -163,7 +141,7 @@ export const parsePromptPay = (data: string) => {
   )
 
   let simplifiedAmount: string | undefined = undefined
-  const amountMatch = data.match(amountRegex)
+  const amountMatch = data.match(AMOUNT_REGEX)
   if (amountMatch) simplifiedAmount = simplifyAmount(amountMatch[0])
 
   return {
