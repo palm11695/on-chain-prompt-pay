@@ -12,7 +12,7 @@ export interface InitTransferRequestCalldata {
   exchangeRate: bigint
   deadline: bigint
   promptPayId: string
-  verifiedMessage: Signature | undefined
+  zexSignature: Signature | undefined
 }
 
 const defaultInitTransferRequestCalldata: InitTransferRequestCalldata = {
@@ -20,10 +20,10 @@ const defaultInitTransferRequestCalldata: InitTransferRequestCalldata = {
   exchangeRate: 0n,
   deadline: 0n,
   promptPayId: '',
-  verifiedMessage: undefined,
+  zexSignature: undefined,
 }
 
-const defaultVerifiedMessage: Signature = {
+const defaultSignature: Signature = {
   v: 0n,
   r: '0x',
   s: '0x',
@@ -33,12 +33,12 @@ export const usePrepareCreateInitTransferRequest = ({
   calldata,
   onSuccess,
   onFail,
-  enabled = true,
+  enabled,
 }: IUsePrepareWriteParams<InitTransferRequestCalldata>): IUsePreparedWrite => {
-  const { thbAmount, exchangeRate, deadline, promptPayId, verifiedMessage } =
+  const { thbAmount, exchangeRate, deadline, promptPayId, zexSignature } =
     calldata ?? defaultInitTransferRequestCalldata
 
-  const { v, r, s } = verifiedMessage ?? defaultVerifiedMessage
+  const { v, r, s } = zexSignature ?? defaultSignature
 
   const _enabled = useMemo(() => {
     if (

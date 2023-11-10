@@ -2,9 +2,8 @@ import Skeleton from 'react-loading-skeleton'
 import { etherDecimal, middleEllipsis } from '../utils/utils'
 import { USD_THB } from '../utils/constants'
 import { ITokenProfile } from '../configs/tokens'
-import { ActionStatus } from '../pages/Transfer/TransferPage'
 import { tokenPrices } from '../configs/prices'
-import { ReceiverType } from '../pages/Reader/QrCodeReader'
+import { ActionStatus, ReceiverType } from '../enums'
 
 interface IAccountSection {
   status: ActionStatus

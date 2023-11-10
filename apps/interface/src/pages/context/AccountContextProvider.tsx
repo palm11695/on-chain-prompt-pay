@@ -19,21 +19,6 @@ export const AccountContextProvider = ({
 }): JSX.Element => {
   const { address } = useAccount()
   const chain = usePageChain()
-  // const [aaAccount, _] = useAtom(aaAccountAtom)
-
-  // load data
-  // const [aaAccountData, aaAccountAddress] = useMemo(() => {
-  //   if (!address) return [undefined, undefined]
-  //   if (!aaAccount[address]) return [undefined, undefined]
-
-  //   const _account = aaAccount[address]
-  //   return [_account, parseAddressFromEncryptedWallet(_account) as Address]
-  // }, [address, aaAccount])
-
-  // const isAaNeeded = useMemo(() => {
-  //   if (address && !aaAccountAddress) return true
-  //   return false
-  // }, [address, aaAccountAddress])
 
   const {
     tokenBalances,
@@ -47,7 +32,6 @@ export const AccountContextProvider = ({
         account: address,
         tokenBalances,
         tokenAllowances,
-        // , aaAccountData, aaAccountAddress, isAaNeeded
       }}
     >
       <ContextAction.Provider value={{ refetchTokenStates }}>
