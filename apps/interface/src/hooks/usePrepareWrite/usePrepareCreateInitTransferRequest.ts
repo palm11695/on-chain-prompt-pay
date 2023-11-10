@@ -6,6 +6,7 @@ import { Signature } from 'viem'
 import { usePreparePaymentHandlerInitTransferRequest } from '../../../../../sdk/src'
 import { useMemo } from 'react'
 import { ContractKey, contracts } from '../../configs/contract'
+import { useAddRecentTransaction } from '@rainbow-me/rainbowkit'
 
 export interface InitTransferRequestCalldata {
   thbAmount: bigint
@@ -35,6 +36,8 @@ export const usePrepareCreateInitTransferRequest = ({
   onFail,
   enabled,
 }: IUsePrepareWriteParams<InitTransferRequestCalldata>): IUsePreparedWrite => {
+  const addRecentTransaction = useAddRecentTransaction()
+
   const { thbAmount, exchangeRate, deadline, promptPayId, zexSignature } =
     calldata ?? defaultInitTransferRequestCalldata
 
@@ -84,8 +87,20 @@ export const usePrepareCreateInitTransferRequest = ({
   // wait for transaction
   useWaitForTransaction({
     hash: data?.hash,
-    onSuccess: onSuccess,
-    onError: onFail,
+    onSuccess: () => {
+      onSuccess && onSuccess(),
+        addRecentTransaction({
+          hash: data?.hash ?? '0x00..0000',
+          description: 'Init transfer request',
+        })
+    },
+    onError: () => {
+      onFail && onFail(),
+        addRecentTransaction({
+          hash: data?.hash ?? '0x00..0000',
+          description: 'Init transfer request',
+        })
+    },
   })
 
   return {
